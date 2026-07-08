@@ -1,5 +1,7 @@
 import ContinuerButton from "@/components/continuerButton"
+import Input from "@/components/input";
 import ServiceButton, { ServiceButtonProps } from "@/components/serviceButton"
+import React from 'react';
 import { useState } from "react"
 import { StyleSheet } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -78,6 +80,7 @@ function index() {
       ))*/}
       <ContinuerButton filled text = {"Continuer"}  />
       <ContinuerButton filled = {false} text = {"Passer"}/>
+      <Input text = {"Numéro de téléphone"} placeholder="07 00 00 00 00"/>
     </SafeAreaView>
   )
 }
