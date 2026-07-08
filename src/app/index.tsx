@@ -1,3 +1,4 @@
+import ContinuerButton from "@/components/continuerButton"
 import ServiceButton, { ServiceButtonProps } from "@/components/serviceButton"
 import { useState } from "react"
 import { StyleSheet } from "react-native"
@@ -66,7 +67,7 @@ function index() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      {services.map((service) => (
+      {/*services.map((service) => (
         <ServiceButton 
           key={service.title} 
           title={service.title} 
@@ -74,7 +75,9 @@ function index() {
           onPress={() => changeSelectedService(service)} 
           selected={service.selected}
         />
-      ))}
+      ))*/}
+      <ContinuerButton filled text = {"Continuer"}  />
+      <ContinuerButton filled = {false} text = {"Passer"}/>
     </SafeAreaView>
   )
 }
