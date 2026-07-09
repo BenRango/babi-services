@@ -1,5 +1,6 @@
 import ContinuerButton from "@/components/continuerButton";
 import Input from "@/components/input";
+import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -8,22 +9,28 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 100,
     paddingHorizontal: 10,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  }
-})
+    justifyContent: "space-around",
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+});
 function index() {
-  
+  const [phonenumber, setPhonenumber] = useState<string>("");
+  const handleChange = (text: string) => {
+    if (text.length <= 10) {
+      setPhonenumber(text);
+    }
+    
+  };
   return (
     <SafeAreaView style={styles.container}>
-      <ContinuerButton filled text = {"Continuer"}  />
-      <ContinuerButton filled = {false} text = {"Passer"}/>
-      <Input text = {"Numéro de téléphone"} placeholder="07 00 00 00 00"/>
+      <ContinuerButton filled text={"Continuer"} />
+      <ContinuerButton filled={false} text={"Passer"} />
+      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange}/>
     </SafeAreaView>
-  )
+  );
 }
 
-export default index
+export default index;
