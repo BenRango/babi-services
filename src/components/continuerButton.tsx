@@ -1,6 +1,4 @@
-import React from 'react'
-import { StyleSheet, Text } from 'react-native'
-import { TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 
 interface ContinuerButtonProps {
   filled ?: boolean
@@ -19,12 +17,13 @@ export default function ContinuerButton(props:ContinuerButtonProps) {
 }
 const styles = StyleSheet.create({
   container:{
-    width:"70%",
+    width:"80%",
     paddingHorizontal: 50,
-    paddingVertical: 10,
+    paddingVertical: 15,
     alignItems: "center",
-    borderRadius:15
-
+    borderRadius:15,
+    shadowOffset: { width: 0, height: 2 },
+    marginBottom: 20,
   },
   text: {
     color: "white",

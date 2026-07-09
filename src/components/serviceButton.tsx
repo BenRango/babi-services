@@ -10,24 +10,26 @@ export interface ServiceButtonProps {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
-    borderColor: 'black',
-    borderStyle: 'solid',
     padding: 5,
-    borderRadius: 25,
+    borderRadius: 18,
     minWidth: '30%',
     width: 'auto',
-    height: 100,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 10,
-    margin: 10
+    marginHorizontal: 0,
+    marginVertical: 5
   },
   selectedContainer: {
-    backgroundColor: "blue"
+    backgroundColor: "#f0d7c03f",
+    outlineColor: "#ec6a00ab",
+    outlineWidth: 2
   },
   unselectedContainer: {
-    backgroundColor: "red"
+    backgroundColor: "#f0f0f02a",
+    outlineColor: "#a3a3a333",
+    outlineWidth: 2
   },
   imageContainer: {
     flexDirection: 'row',
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: 'black',
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'montserrat'
   }
 })
