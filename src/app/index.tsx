@@ -1,6 +1,8 @@
-import ContinuerButton from "@/components/continuerButton"
-import { StyleSheet } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
+import ContinuerButton from "@/components/continuerButton";
+import Input from "@/components/input";
+import React from 'react';
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   container: {
@@ -20,6 +22,7 @@ function index() {
     <SafeAreaView style={styles.container}>
       <ContinuerButton filled text = {"Continuer"}  />
       <ContinuerButton filled = {false} text = {"Passer"}/>
+      <Input text = {"Numéro de téléphone"} placeholder="07 00 00 00 00"/>
     </SafeAreaView>
   )
 }
