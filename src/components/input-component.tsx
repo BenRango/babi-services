@@ -26,7 +26,8 @@ export default function InputComponent({ value, type, onChangeText }: InputCompo
 const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#e0e0e0",
+    backgroundColor: "#ffffffa9",
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 50,

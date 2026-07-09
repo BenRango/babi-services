@@ -17,7 +17,7 @@ export default function ContinuerButton(props:ContinuerButtonProps) {
 }
 const styles = StyleSheet.create({
   container:{
-    width:"80%",
+    width:"90%",
     paddingHorizontal: 50,
     paddingVertical: 15,
     alignItems: "center",
