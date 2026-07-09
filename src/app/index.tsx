@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 function index() {
   const [phonenumber, setPhonenumber] = useState<string>("");
   const handleChange = (text: string) => {
-    if (text.length <= 10) {
+    if (/^[0-9]{0,10}$/.test(text)) {
       setPhonenumber(text);
     }
     
