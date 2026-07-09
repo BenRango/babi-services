@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 export default function demande() {
     const [location, setLocation] = useState<string>("")
+    const [description, setDescription] = useState<string>("")
     const [services, setServices] = useState<ServiceButtonProps[]>([
     {
       title: "Plomberie",
@@ -62,6 +63,12 @@ export default function demande() {
   }
   return (
     <SafeAreaView style={styles.mainContainer}>
+        <Text style={styles.sectionTitle}>Description du problème*</Text>
+        <InputComponent 
+            value={description}
+            onChangeText={(text)=> setDescription(text)}
+            type="textarea"
+        />
         <Text style={styles.sectionTitle}>Catégories*</Text>
         <View style={styles.container}>
             {services.map((service) => (
@@ -75,7 +82,8 @@ export default function demande() {
             ))}
         </View>
         <Text style={styles.sectionTitle}>Localisation*</Text>
-        <InputComponent value={location}
+        <InputComponent 
+            value={location}
             onChangeText={(text)=> setLocation(text)}
         />
     </SafeAreaView>

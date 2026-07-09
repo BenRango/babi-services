@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 5,
     borderRadius: 18,
-    minWidth: '30%',
+    minWidth: '31.5%',
     width: 'auto',
     height: 80,
     justifyContent: 'center',

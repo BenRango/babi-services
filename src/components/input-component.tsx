@@ -2,13 +2,23 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 interface InputComponentProps {
   value: string;
+  type?: "text" | "password" | "email" | "numeric" | "textarea";
   onChangeText: (text: string) => void;
 }
 
-export default function InputComponent({ value, onChangeText }: InputComponentProps) {
+export default function InputComponent({ value, type, onChangeText }: InputComponentProps) {
   return (
-    <View style={styles.container}>
-      <TextInput value={value} onChangeText={onChangeText} style={styles.input} />
+    <View style={[styles.container, type === "textarea" && styles.textArea]}>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={type === "password"}
+        multiline={type === "textarea"}
+        numberOfLines={type === "textarea" ? 4 : 1}
+        textAlignVertical={type === "textarea" ? "top" : "center"}
+        keyboardType={type === "numeric" ? "numeric" : "default"}
+        style={styles.input}
+      />
     </View>
   )
 }
@@ -22,6 +32,9 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     marginVertical: 10
+  },
+  textArea: {
+    height: 150
   },
   input: {
     flex: 1,
