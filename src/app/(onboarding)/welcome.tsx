@@ -89,12 +89,12 @@ function index() {
       <ContinuerButton
         filled
         text={"Continuer"}
-        onPress={() => router.push("/(auth)/login")}
+        onPress={() => router.push("/(auth)/role_selection")}
       />
       <ContinuerButton
         filled={false}
         text={"Passer"}
-        onPress={() => router.push("/(auth)/login")}
+        onPress={() => router.push("/(auth)/role_selection")}
       />
     </SafeAreaView>
   );
