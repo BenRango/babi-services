@@ -1,24 +1,24 @@
+import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useState } from "react";
 import {
-    Image,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import logo from "../../../assets/images/logo/BabiService_logo.png";
-import { useRouter } from "expo-router";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable style={styles.backButton} onPress={()=>router.back()}>
+      <Pressable style={styles.backButton} onPress={() => router.back()}>
         <ChevronLeft size={22} color="#1A1A1A" />
       </Pressable>
 
@@ -46,7 +46,10 @@ export default function Login() {
         Politique de confidentialité.
       </Text>
 
-      <Pressable style={styles.smsButton}>
+      <Pressable
+        style={styles.smsButton}
+        onPress={() => router.push("/(client)")}
+      >
         <Text style={styles.smsButtonText}>Recevoir le code SMS</Text>
       </Pressable>
 
