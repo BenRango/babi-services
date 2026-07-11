@@ -1,3 +1,4 @@
+import Chat from "@/components/chat";
 import ContinuerButton from "@/components/continuerButton";
 import Input from "@/components/input";
 import { useState } from "react";
@@ -28,7 +29,9 @@ function index() {
     <SafeAreaView style={styles.container}>
       <ContinuerButton filled text={"Continuer"} />
       <ContinuerButton filled={false} text={"Passer"} />
-      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange}/>
+      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange} />
+      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange} />
+      <Chat/>
     </SafeAreaView>
   );
 }
