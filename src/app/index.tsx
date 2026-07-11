@@ -1,6 +1,7 @@
 import Chat from "@/components/chat";
 import ContinuerButton from "@/components/continuerButton";
 import Input from "@/components/input";
+import StatusBubble from "@/components/statusBubble";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,15 +24,18 @@ function index() {
     if (text.length <= 10) {
       setPhonenumber(text);
     }
-    
   };
   return (
     <SafeAreaView style={styles.container}>
       <ContinuerButton filled text={"Continuer"} />
       <ContinuerButton filled={false} text={"Passer"} />
-      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange} />
-      <Input text={"Numéro de téléphone"} placeholder="07 00 00 00 00"  value = {phonenumber} onChangeText={handleChange} />
-      <Chat/>
+      <Input
+        text={"Numéro de téléphone"}
+        placeholder="07 00 00 00 00"
+        value={phonenumber}
+        onChangeText={handleChange}
+      />
+     
     </SafeAreaView>
   );
 }
