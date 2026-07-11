@@ -1,12 +1,16 @@
 import InputComponent from "@/components/input-component"
 import ServiceButton, { ServiceButtonProps } from "@/components/serviceButton"
+import DateTimePicker, { DateTimePickerChangeEvent } from '@react-native-community/datetimepicker'
 import { useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-
+const maximumDate = new Date(2028, 10)
+const initialDate = new Date()
 export default function demande() {
     const [location, setLocation] = useState<string>("")
+    const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false)
     const [description, setDescription] = useState<string>("")
+    const [wishedDate, setWishedDate] = useState<Date>(initialDate)
     const [services2, setServices2] = useState<ServiceButtonProps[]>([
         {
         title: "Plomberie",
@@ -76,6 +80,7 @@ export default function demande() {
       }
     }
   ])
+  
   const changeSelectedService = (service: ServiceButtonProps) => {
     setServices(
       services.map((s) => ({ 
@@ -84,6 +89,19 @@ export default function demande() {
         })
       ))
     console.log(services)
+  }
+  const changeSelectedModeFacturation = (service: ServiceButtonProps) => {
+    setServices2(
+      services2.map((s) => ({ 
+          ...s, 
+          selected: s.title === service.title  
+        })
+      ))
+    console.log(services)
+  }
+  const handleDateChange = (e?: DateTimePickerChangeEvent) =>{
+    setDatePickerVisible(!datePickerVisible)
+    //setWishedDate(date)
   }
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -113,8 +131,16 @@ export default function demande() {
         <Text style={styles.sectionTitle}>Date souhaitée*</Text>
         <InputComponent 
             value={location}
-            onChangeText={(text)=> setLocation(text)}
+            onChangeText={(text)=> handleDateChange()}
         />
+        {datePickerVisible&&  
+          <DateTimePicker 
+            value={wishedDate}
+            minimumDate={new Date()}
+            maximumDate= {maximumDate}
+            //onValueChange={(e)=> handleDateChange(e)}
+          />
+        }
 
         <Text style={styles.sectionTitle}>Mode facturation*</Text>
         <View style={styles.container}>
@@ -123,7 +149,7 @@ export default function demande() {
                     key={service.title} 
                     title={service.title} 
                     logoSource={service.logoSource} 
-                    onPress={() => changeSelectedService(service)} 
+                    onPress={() => changeSelectedModeFacturation(service)} 
                     selected={service.selected}
                 />
             ))}
