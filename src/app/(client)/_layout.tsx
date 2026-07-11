@@ -1,5 +1,6 @@
+import { Image } from "expo-image";
 import { Tabs } from "expo-router";
-import { ClipboardList, Home, User, Wallet } from "lucide-react-native";
+import { Home, User, Wallet } from "lucide-react-native";
 
 export default function ClientLayout() {
   return (
@@ -15,7 +16,7 @@ export default function ClientLayout() {
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#F0EDE6",
-          height: 64,
+          height: 80,
           paddingBottom: 8,
           paddingTop: 8,
         },
@@ -29,11 +30,13 @@ export default function ClientLayout() {
         }}
       />
       <Tabs.Screen
-        name="demandes"
+        name="demand"
         options={{
           title: "Demandes",
           tabBarIcon: ({ color, size }) => (
-            <ClipboardList color={color} size={size} />
+            <Image 
+            style={{width: size, height: size, tintColor: color }}
+            source={require("@/assets/icons/request-send.png")} />
           ),
         }}
       />

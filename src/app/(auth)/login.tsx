@@ -1,3 +1,4 @@
+import logo from "@/assets/images/logo/BabiService_logo.png";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useState } from "react";
@@ -10,7 +11,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import logo from "../../../assets/images/logo/BabiService_logo.png";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
