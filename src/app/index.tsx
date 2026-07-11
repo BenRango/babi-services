@@ -1,43 +1,5 @@
-import Chat from "@/components/chat";
-import ContinuerButton from "@/components/continuerButton";
-import Input from "@/components/input";
-import StatusBubble from "@/components/statusBubble";
-import { useState } from "react";
-import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Redirect } from "expo-router";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 100,
-    paddingHorizontal: 10,
-    justifyContent: "space-around",
-    alignItems: "center",
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-});
-function index() {
-  const [phonenumber, setPhonenumber] = useState<string>("");
-  const handleChange = (text: string) => {
-    if (/^[0-9]{0,10}$/.test(text)) {
-      setPhonenumber(text);
-    }
-  };
-  return (
-    <SafeAreaView style={styles.container}>
-      <ContinuerButton filled text={"Continuer"} />
-      <ContinuerButton filled={false} text={"Passer"} />
-      <Input
-        text={"Numéro de téléphone"}
-        placeholder="07 00 00 00 00"
-        value={phonenumber}
-        onChangeText={handleChange}
-      />
-     
-    </SafeAreaView>
-  );
+export default function Index() {
+  return <Redirect href="/(onboarding)/welcome" />;
 }
-
-export default index;
