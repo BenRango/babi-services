@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     padding: 25,
     borderRadius: 8,
     marginBottom: 16,
-     width: "70%",
+    width: "70%",
 
   },
   input: {
@@ -55,11 +55,6 @@ const styles = StyleSheet.create({
     outlineWidth: 1,
     outlineColor: "orange",
 
-  },
- 
-  erreur: {
-    color: 'red',
-    marginTop: 4
   },
 
 })
