@@ -22,6 +22,11 @@ export const Colors = {
     backgroundSelected: "#2E3135",
     textSecondary: "#B0B4BA",
   },
+  orange: {
+    text: "#EA7718",
+    background: "#FDEEE2",
+    border: "#EA7718"
+  }
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
@@ -86,6 +91,6 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   placeholder: {
-    placeholderTextColor: "#6e6e6e",
+    color: "#6e6e6e",
   },
 });

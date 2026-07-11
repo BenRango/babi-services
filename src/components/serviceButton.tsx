@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     minWidth: '31.5%',
     width: 'auto',
-    height: 80,
+    height: 120,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 10,
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     outlineWidth: 2
   },
   unselectedContainer: {
-    backgroundColor: "#f0f0f02a",
+    backgroundColor: "#ffffffe7",
     outlineColor: "#a3a3a333",
     outlineWidth: 2
   },

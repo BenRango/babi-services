@@ -1,8 +1,9 @@
 import InputComponent from "@/components/input-component"
 import ServiceButton, { ServiceButtonProps } from "@/components/serviceButton"
+import { Colors } from "@/constants/theme"
 import DateTimePicker, { DateTimePickerChangeEvent } from '@react-native-community/datetimepicker'
 import { useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 const maximumDate = new Date(2028, 10)
 const initialDate = new Date()
@@ -11,6 +12,13 @@ export default function demande() {
     const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false)
     const [description, setDescription] = useState<string>("")
     const [wishedDate, setWishedDate] = useState<Date>(initialDate)
+    const [budgetMax, setBudgetMax] = useState<string |undefined>(undefined)
+    const [propositionsBudget]= useState<number[]>([
+      20000,
+      5000,
+      10000,
+      50000
+    ])
     const [services2, setServices2] = useState<ServiceButtonProps[]>([
         {
         title: "Plomberie",
@@ -80,7 +88,12 @@ export default function demande() {
       }
     }
   ])
-  
+  const handlePropositionBudgetPicked = (value: string) => {
+    
+    if (/^[0-9]{3,}$/.test(value) && parseInt(value) ) {
+      setBudgetMax(value)
+    }
+  }
   const changeSelectedService = (service: ServiceButtonProps) => {
     setServices(
       services.map((s) => ({ 
@@ -105,25 +118,47 @@ export default function demande() {
   }
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <Text style={styles.sectionTitle}>Quel service ?*</Text>
+      <View style={styles.container}>
+          {services.map((service) => (
+              <ServiceButton
+                  key={service.title} 
+                  title={service.title} 
+                  logoSource={service.logoSource} 
+                  onPress={() => changeSelectedService(service)} 
+                  selected={service.selected}
+              />
+          ))}
+      </View>
         <Text style={styles.sectionTitle}>Description du problème*</Text>
         <InputComponent 
             value={description}
+            placeholder="Ex : Mon lavabo est bouché depuis hier, l'eau ne coule plus..."
             onChangeText={(text)=> setDescription(text)}
             type="textarea"
         />
-        <Text style={styles.sectionTitle}>Catégories*</Text>
-        <View style={styles.container}>
-            {services.map((service) => (
-                <ServiceButton
-                    key={service.title} 
-                    title={service.title} 
-                    logoSource={service.logoSource} 
-                    onPress={() => changeSelectedService(service)} 
-                    selected={service.selected}
-                />
-            ))}
+        <Text style={styles.sectionTitle}>Budget maximal*</Text>
+        <View style={styles.budgetContainer}>
+          <TextInput 
+            placeholder="20000" 
+            keyboardType="numeric" 
+            style={styles.budgetInput}
+            onChangeText={(text)=>{handlePropositionBudgetPicked(text)}}
+            value={budgetMax}
+          />
+          <Text style={styles.currencyText}>FCFA</Text>
         </View>
-        <Text style={styles.sectionTitle}>Localisation*</Text>
+        <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+          {propositionsBudget.sort().map((proposition, index)=>
+            <TouchableOpacity 
+              style={styles.budgetSuggestion} 
+              key={index} 
+              onPress={()=> handlePropositionBudgetPicked(proposition.toString())}>
+              <Text style={{color: Colors.orange.text, fontWeight: 600}}>{proposition}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
         <InputComponent 
             value={location}
             onChangeText={(text)=> setLocation(text)}
@@ -138,7 +173,6 @@ export default function demande() {
             value={wishedDate}
             minimumDate={new Date()}
             maximumDate= {maximumDate}
-            //onValueChange={(e)=> handleDateChange(e)}
           />
         }
 
@@ -166,9 +200,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap'
   },
+  budgetContainer:{
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginVertical: 10,
+  },
+  budgetSuggestion: {
+    backgroundColor: Colors.orange.background,
+    borderColor: Colors.orange.border,
+    borderWidth: 1,
+    color: Colors.orange.text,
+    padding: 15,
+    paddingHorizontal: 18,
+    borderRadius: 25,
+    width: "auto"
+  },
+  budgetInput: {
+    backgroundColor: "#ffffffd7",padding: 10,borderRadius: 8,
+    fontSize: 16,
+    minWidth :"85%",
+    borderColor: "#5252523a",
+    borderWidth: 1,
+    marginRight: 5
+  },
+  currencyText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: "auto",
+    paddingRight: 10
+  },
   mainContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FDF8F1',
     padding: 20,
   },
   sectionTitle: {
