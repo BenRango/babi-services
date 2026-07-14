@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   image: {
-    width: 20,
-    height: 20
+    width: 32,
+    height: 32
   },
   title: {
     color: 'black',

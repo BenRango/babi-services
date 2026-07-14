@@ -162,11 +162,8 @@ export default function demande() {
               )}
             </View>
             
-            <InputComponent 
-                value={location}
-                onChangeText={(text)=> setLocation(text)}
-            />
-            <Text style={styles.sectionTitle}>Date souhaitée*</Text>
+
+            <Text style={styles.sectionTitle}>Comment trouver votre prestataire</Text>
             <InputComponent 
                 value={location}
                 onChangeText={(text)=> handleDateChange()}
