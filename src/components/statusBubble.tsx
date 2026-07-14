@@ -13,7 +13,7 @@ export default function StatusBubble(props: StatusBubbleProps) {
        
         <BlurView
           intensity = {20}
-          tint= "dark"
+          tint= "light"
           style= {styles.blur} 
         
         > 
@@ -28,25 +28,34 @@ export default function StatusBubble(props: StatusBubbleProps) {
 
 const styles = StyleSheet.create({
   conteneur: {
-    alignItems: "center",
-    marginVertical: 10,
+    // alignItems: "center",
+    marginHorizontal:80,
+    marginTop: "60%",
+    width:"120%",
+    alignContent:"center",
+
+
+
   },
 
   text: {
     color: "#0F8436",
+    fontWeight:"bold"
+  
   },
   bulle: {
     borderRadius: 20,
-    backgroundColor: "#e3f8e9",
+    backgroundColor: "#e3f8e990",
     paddingHorizontal: 10,
     paddingVertical: 6,
+    
     
   },
   blur:{
     position: "absolute",
     bottom: 0,
-    width: "100%",
-    height: 100,
+    width: "50%",
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
   }
