@@ -1,6 +1,8 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { Image } from "expo-image";
 import { Tabs } from "expo-router";
 import { Home, User, Wallet } from "lucide-react-native";
+
 
 export default function ClientLayout() {
   return (
@@ -41,6 +43,14 @@ export default function ClientLayout() {
         }}
       />
       <Tabs.Screen
+        name="message"
+        options={{
+          title: "Message",
+          tabBarIcon: ({ color, size }) => 
+          <AntDesign color={color} size={size} name="message"  />,
+        }}
+      />
+      <Tabs.Screen
         name="wallet"
         options={{
           title: "Wallet",
@@ -54,6 +64,7 @@ export default function ClientLayout() {
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
+      
     </Tabs>
   );
 }
