@@ -1,4 +1,6 @@
-import { View, StyleSheet,Text,Image } from 'react-native'
+import { View, StyleSheet,Text, } from 'react-native'
+import {Image} from 'expo-image'
+
 
 interface ChatProps {
   moi : boolean
@@ -14,7 +16,7 @@ export default function Chat(props:ChatProps) {
     >
       {!props.moi && (
         <Image 
-        source={{ uri: props.avatarUrl }}
+        source={props.avatarUrl }
         style= {styles.avatar}
         />
       ) }
@@ -35,7 +37,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     marginVertical: 6,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
+
 
   },
   avatar: {
@@ -49,16 +52,21 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 10,
+
+
   },
   bulleMoi:{
     backgroundColor: "#FF6A00",
     borderBottomRightRadius: 4,
+    
 
   },
 
   bulleAutre: {
-    backgroundColor: "#F3F3F5",
-    borderBottomLeftRadius: 4
+    backgroundColor: "#c3c3c5",
+    borderBottomLeftRadius: 4,
+    marginTop: 90,
+
 
   },
   textMoi: {
