@@ -1,33 +1,33 @@
+import AudioBubble from '@/components/audioBubble'
+import { MessageItem } from '@/types/chat'
 import { View, StyleSheet,Text, } from 'react-native'
 import {Image} from 'expo-image'
 
 
-interface ChatProps {
-  moi : boolean
-  text : string
-  heure: string
-  avatarUrl: string
-
-}
+type ChatProps = MessageItem
 
 export default function Chat(props:ChatProps) {
   return (
-    <View style = {[styles.ligne,{justifyContent:props.moi ? "flex-end" : "flex-start"}]} 
+    <View style = {[styles.ligne,{justifyContent:props.moi ? "flex-end" : "flex-start"}]}
     >
       {!props.moi && (
-        <Image 
+        <Image
         source={props.avatarUrl }
         style= {styles.avatar}
         />
       ) }
       <View style= {[styles.bulle, props.moi ? styles.bulleMoi : styles.bulleAutre]}>
-        <Text style= {props.moi ? styles.textMoi : styles.textAutre}>{props.text}
-        </Text>
+        {props.type === "audio" ? (
+          <AudioBubble uri={props.uri} dureeSec={props.dureeSec} moi={props.moi} />
+        ) : (
+          <Text style= {props.moi ? styles.textMoi : styles.textAutre}>{props.text}
+          </Text>
+        )}
       <Text style= {[styles.heure,{color: props.moi ? 'rgba(255,255,255,0.7)' : "#999"}]}>{props.heure}</Text>
 
       </View>
-      
-      
+
+
     </View>
   )
 }
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   bulleMoi:{
     backgroundColor: "#FF6A00",
     borderBottomRightRadius: 4,
-    
+
 
   },
 
@@ -82,5 +82,5 @@ const styles = StyleSheet.create({
     marginTop: 11,
     alignSelf: "flex-end"
   }
-  
+
 })

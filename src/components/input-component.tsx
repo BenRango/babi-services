@@ -1,3 +1,4 @@
+import { Colors, Fonts, Radii } from "@/constants/theme";
 import { StyleSheet, TextInput, View } from "react-native";
 
 interface InputComponentProps {
@@ -15,6 +16,7 @@ export default function InputComponent({ placeholder, value, type, onChangeText 
         onChangeText={onChangeText}
         secureTextEntry={type === "password"}
         placeholder={placeholder}
+        placeholderTextColor={Colors.light.textSecondary}
         multiline={type === "textarea"}
         numberOfLines={type === "textarea" ? 4 : 1}
         textAlignVertical={type === "textarea" ? "top" : "center"}
@@ -28,19 +30,22 @@ export default function InputComponent({ placeholder, value, type, onChangeText 
 const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    backgroundColor: "#ffffffa9",
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderColor: Colors.light.backgroundSelected,
+    backgroundColor: Colors.light.backgroundElement,
+    borderRadius: Radii.sm,
+    paddingHorizontal: 14,
     height: 50,
     justifyContent: 'center',
     marginVertical: 10
   },
   textArea: {
-    height: 150
+    height: 120,
+    paddingVertical: 12,
   },
   input: {
     flex: 1,
-    fontFamily: "Outfit"
+    fontFamily: Fonts.body,
+    fontSize: 14,
+    color: Colors.brand.encre,
   }
 })

@@ -1,6 +1,6 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Design tokens BabiServices — alignés sur le mockup MVP (BaBi Ecrans MVP_final).
+ * Typo : Baloo 2 (titres) / Nunito Sans (texte & UI).
  */
 
 import "@/global.css";
@@ -9,11 +9,11 @@ import { Platform, StyleSheet } from "react-native";
 
 export const Colors = {
   light: {
-    text: "#000000",
-    background: "#ffffff",
-    backgroundElement: "#F0F0F3",
-    backgroundSelected: "#E0E1E6",
-    textSecondary: "#60646C",
+    text: "#241A12",
+    background: "#FBF7F1",
+    backgroundElement: "#FFFFFF",
+    backgroundSelected: "#FDEEDF",
+    textSecondary: "#6B5F55",
   },
   dark: {
     text: "#ffffff",
@@ -22,39 +22,34 @@ export const Colors = {
     backgroundSelected: "#2E3135",
     textSecondary: "#B0B4BA",
   },
+  brand: {
+    orange: "#EC7412",
+    vert: "#1E8E3E",
+    encre: "#241A12",
+    fond: "#FBF7F1",
+    tintOr: "#FDEEDF",
+    tintVert: "#E5F4E8",
+  },
+  /** @deprecated utiliser Colors.brand — conservé le temps de migrer les écrans qui l'utilisent encore */
   orange: {
-    text: "#EA7718",
-    background: "#FDEEE2",
-    border: "#EA7718"
-  }
+    text: "#EC7412",
+    background: "#FDEEDF",
+    border: "#EC7412",
+  },
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: "system-ui",
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: "ui-serif",
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: "ui-rounded",
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: "ui-monospace",
-  },
-  default: {
-    sans: "normal",
-    serif: "serif",
-    rounded: "normal",
-    mono: "monospace",
-  },
-  web: {
-    sans: "var(--font-display)",
-    serif: "var(--font-serif)",
-    rounded: "var(--font-rounded)",
-    mono: "var(--font-mono)",
-  },
-});
+export const Fonts = {
+  title: "Baloo2_700Bold",
+  titleSemiBold: "Baloo2_600SemiBold",
+  titleMedium: "Baloo2_500Medium",
+  body: "NunitoSans_400Regular",
+  bodyMedium: "NunitoSans_600SemiBold",
+  bodyBold: "NunitoSans_700Bold",
+  /** @deprecated conservé pour themed-text.tsx (composant template Expo, hors périmètre client) */
+  mono: Platform.select({ ios: "ui-monospace", default: "monospace" }),
+} as const;
 
 export const Spacing = {
   half: 2,
@@ -66,7 +61,13 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const Radii = {
+  sm: 12,
+  md: 18,
+  lg: 24,
+} as const;
+
+export const BottomTabInset = 0;
 export const MaxContentWidth = 800;
 export const styles = StyleSheet.create({
   container: {
@@ -84,7 +85,7 @@ export const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#FF6900",
+    borderColor: Colors.brand.orange,
   },
   erreur: {
     color: "red",

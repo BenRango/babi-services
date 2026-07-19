@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="menage" data-name="Flat Color" class="icon flat-color">
+  <rect id="primary" x="10.5" y="2" width="2" height="10" rx="1" style="fill: rgb(36, 26, 18);"></rect>
+  <path id="secondary" d="M7 12h9a1 1 0 0 1 .94 1.34l-1.2 3.3A2 2 0 0 1 13.86 18H9.14a2 2 0 0 1-1.88-1.36l-1.2-3.3A1 1 0 0 1 7 12Z" style="fill: rgb(236, 116, 18);"></path>
+  <path id="primary-2" d="M9.14 18h4.72l-.62 2.47A1 1 0 0 1 12.27 21h-2.54a1 1 0 0 1-.97-1.53Z" style="fill: rgb(36, 26, 18);"></path>
+</svg>

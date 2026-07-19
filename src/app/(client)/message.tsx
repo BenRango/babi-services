@@ -2,6 +2,7 @@ import Chat from "@/components/chat";
 import ChatHearder from "@/components/chatHearder";
 import ChatInputText from "@/components/chatInputText";
 import StatusBubble from "@/components/statusBubble";
+import { VoiceRecording } from "@/hooks/useVoiceRecorder";
 import { MessageItem } from "@/types/chat";
 import { useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, View } from "react-native";
@@ -11,12 +12,14 @@ const AVATAR_URL = "https://thispersondoesnotexist.com/random-person.jpeg";
 export default function message() {
   const [messages, setMessage] = useState<MessageItem[]>([
     {
+      type: "text",
       text: "Bonjour ! Comment puis-je vous aider ?",
       moi: false,
       heure: "10:12",
       avatarUrl: AVATAR_URL,
     },
     {
+      type: "text",
       text: "Salut ! Je cherche des informations sur React Native.",
       moi: true,
       heure: "10:13",
@@ -34,10 +37,17 @@ export default function message() {
     return `${h}:${m}`;
   };
 
+  const scrollVersLeBas = () => {
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
   const envoyerMessage = () => {
     if (Texte.trim() === "") return;
 
     const nouveauMessage: MessageItem = {
+      type: "text",
       text: Texte.trim(),
       moi: true,
       heure: heureActuelle(),
@@ -46,11 +56,22 @@ export default function message() {
 
     setMessage((prev) => [...prev, nouveauMessage]);
     setTexte("");
-
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    scrollVersLeBas();
   };
+
+  const envoyerAudio = (recording: VoiceRecording) => {
+    const nouveauMessage: MessageItem = {
+      type: "audio",
+      uri: recording.uri,
+      dureeSec: recording.dureeSec,
+      moi: true,
+      heure: heureActuelle(),
+      avatarUrl: "",
+    };
+    setMessage((prev) => [...prev, nouveauMessage]);
+    scrollVersLeBas();
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -63,14 +84,7 @@ export default function message() {
           ref={flatListRef}
           data={messages}
           keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) => (
-            <Chat
-              text={item.text}
-              heure={item.heure}
-              avatarUrl={item.avatarUrl}
-              moi={item.moi}
-            />
-          )}
+          renderItem={({ item }) => <Chat {...item} />}
           style={{ flex: 1, backgroundColor: "#fff" }}
           contentContainerStyle={{ paddingVertical: 10 }}
           onContentSizeChange={() =>
@@ -85,6 +99,7 @@ export default function message() {
           value={Texte}
           onChangeText={setTexte}
           onEnvoyer={envoyerMessage}
+          onEnvoyerAudio={envoyerAudio}
         />
       </View>
     </KeyboardAvoidingView>

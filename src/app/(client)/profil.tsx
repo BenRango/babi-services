@@ -1,32 +1,44 @@
+import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
+import { useRouter } from "expo-router";
+import { Bell, ChevronRight, CircleHelp, LogOut, MapPin, User as UserIcon } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const MENU = [
-  "Mes informations",
-  "Mes adresses",
-  "Notifications",
-  "Aide et support",
+const MENU: { icon: typeof UserIcon; label: string }[] = [
+  { icon: UserIcon, label: "Mes informations" },
+  { icon: MapPin, label: "Mes adresses" },
+  { icon: Bell, label: "Notifications" },
+  { icon: CircleHelp, label: "Aide et support" },
 ];
 
 export default function Profil() {
+  const router = useRouter();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <View style={styles.avatar} />
-          <Text style={styles.name}>Utilisateur</Text>
-          <Text style={styles.email}>utilisateur@email.com</Text>
+          <View style={styles.avatar}>
+            <UserIcon size={32} color={Colors.brand.orange} />
+          </View>
+          <Text style={styles.name}>Amidou Koné</Text>
+          <Text style={styles.phone}>+225 07 00 00 00 00</Text>
         </View>
 
         <View style={styles.menu}>
-          {MENU.map((item) => (
-            <Pressable key={item} style={styles.menuItem}>
-              <Text style={styles.menuText}>{item}</Text>
+          {MENU.map(({ icon: Icon, label }) => (
+            <Pressable key={label} style={styles.menuItem}>
+              <View style={styles.menuIconWrap}>
+                <Icon size={16} color={Colors.brand.orange} />
+              </View>
+              <Text style={styles.menuText}>{label}</Text>
+              <ChevronRight size={16} color={Colors.light.textSecondary} />
             </Pressable>
           ))}
         </View>
 
-        <Pressable style={styles.logoutButton}>
+        <Pressable style={styles.logoutButton} onPress={() => router.replace("/(auth)/login")}>
+          <LogOut size={16} color="#E11D48" />
           <Text style={styles.logoutText}>Se déconnecter</Text>
         </Pressable>
       </ScrollView>
@@ -37,56 +49,73 @@ export default function Profil() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAF6F0",
+    backgroundColor: Colors.brand.fond,
   },
   content: {
-    padding: 24,
+    padding: Spacing.four,
   },
   header: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: Spacing.four,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#FBE7D9",
+    backgroundColor: Colors.brand.tintOr,
+    alignItems: "center",
+    justifyContent: "center",
   },
   name: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: Fonts.title,
     fontSize: 18,
-    color: "#1A1A1A",
-    marginTop: 12,
+    color: Colors.brand.encre,
+    marginTop: Spacing.two,
   },
-  email: {
-    fontFamily: "DMSans_400Regular",
+  phone: {
+    fontFamily: Fonts.body,
     fontSize: 13,
-    color: "#8A8A8A",
+    color: Colors.light.textSecondary,
     marginTop: 2,
   },
   menu: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: Colors.light.backgroundElement,
+    borderRadius: Radii.md,
     overflow: "hidden",
   },
   menuItem: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.three,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0EDE6",
+    borderBottomColor: Colors.brand.fond,
+  },
+  menuIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: Radii.sm,
+    backgroundColor: Colors.brand.tintOr,
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuText: {
-    fontFamily: "DMSans_500Medium",
-    fontSize: 15,
-    color: "#1A1A1A",
+    flex: 1,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 14,
+    color: Colors.brand.encre,
   },
   logoutButton: {
-    marginTop: 24,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: Spacing.four,
     alignItems: "center",
-    paddingVertical: 14,
+    justifyContent: "center",
+    paddingVertical: Spacing.three,
   },
   logoutText: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: Fonts.bodyBold,
     fontSize: 15,
     color: "#E11D48",
   },

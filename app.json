@@ -32,7 +32,14 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Autoriser BabiServices à accéder au micro pour enregistrer des notes vocales."
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

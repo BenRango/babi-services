@@ -1,3 +1,4 @@
+import { Colors, Fonts } from '@/constants/theme'
 import { Image } from 'expo-image'
 import { ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -22,14 +23,14 @@ const styles = StyleSheet.create({
     marginVertical: 5
   },
   selectedContainer: {
-    backgroundColor: "#f0d7c03f",
-    outlineColor: "#ec6a00ab",
-    outlineWidth: 2
+    backgroundColor: Colors.brand.tintOr,
+    borderColor: Colors.brand.orange,
+    borderWidth: 2
   },
   unselectedContainer: {
-    backgroundColor: "#ffffffe7",
-    outlineColor: "#a3a3a333",
-    outlineWidth: 2
+    backgroundColor: Colors.light.backgroundElement,
+    borderColor: Colors.light.backgroundSelected,
+    borderWidth: 2
   },
   imageContainer: {
     flexDirection: 'row',
@@ -40,28 +41,28 @@ const styles = StyleSheet.create({
     height: 32
   },
   title: {
-    color: 'black',
+    color: Colors.brand.encre,
     fontSize: 12,
-    fontFamily: 'montserrat'
+    fontFamily: Fonts.bodyMedium,
+    textAlign: 'center'
   }
 })
 
 const ServiceButton = (props: ServiceButtonProps) => {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
         style={[
-            styles.container, 
+            styles.container,
             props.selected && styles.selectedContainer,
             !props.selected && styles.unselectedContainer
-        ]} 
-        disabled={props.selected}
+        ]}
         onPress={props.onPress}
     >
         <View style={styles.imageContainer}>
-        {props.logoSource && 
-            <Image 
+        {props.logoSource &&
+            <Image
                 source={props.logoSource} contentFit="contain"
-                style={styles.image} 
+                style={styles.image}
             />
         }
         </View>
