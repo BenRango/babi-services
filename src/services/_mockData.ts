@@ -26,6 +26,8 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
     note: 4.9,
     nbAvis: 127,
     distanceKm: 1.2,
+    categorie: "plomberie",
+    tarifHoraire: 4000,
   },
   {
     id: "presta-2",
@@ -35,6 +37,8 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
     note: 4.7,
     nbAvis: 89,
     distanceKm: 0.8,
+    categorie: "electricite",
+    tarifHoraire: 4500,
   },
   {
     id: "presta-3",
@@ -44,6 +48,8 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
     note: 4.8,
     nbAvis: 203,
     distanceKm: 2.1,
+    categorie: "menage",
+    tarifHoraire: 2500,
   },
   {
     id: "presta-4",
@@ -53,6 +59,8 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
     note: 4.6,
     nbAvis: 64,
     distanceKm: 3.4,
+    categorie: "menuiserie",
+    tarifHoraire: 3800,
   },
   {
     id: "presta-5",
@@ -62,6 +70,30 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
     note: 4.5,
     nbAvis: 41,
     distanceKm: 2.7,
+    categorie: "peinture",
+    tarifHoraire: 3200,
+  },
+  {
+    id: "presta-6",
+    nom: "Koffi Roger",
+    metier: "Technicien climatisation",
+    avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&auto=format",
+    note: 4.6,
+    nbAvis: 58,
+    distanceKm: 1.9,
+    categorie: "climatisation",
+    tarifHoraire: 5000,
+  },
+  {
+    id: "presta-7",
+    nom: "Aka Prisca",
+    metier: "Frigoriste climatisation",
+    avatarUrl: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&auto=format",
+    note: 4.4,
+    nbAvis: 33,
+    distanceKm: 4.1,
+    categorie: "climatisation",
+    tarifHoraire: 4700,
   },
 ];
 

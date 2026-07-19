@@ -4,12 +4,14 @@ import ChatInputText from "@/components/chatInputText";
 import StatusBubble from "@/components/statusBubble";
 import { VoiceRecording } from "@/hooks/useVoiceRecorder";
 import { MessageItem } from "@/types/chat";
+import { useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, View } from "react-native";
 
 const AVATAR_URL = "https://thispersondoesnotexist.com/random-person.jpeg";
 
 export default function message() {
+  const { nom, avatarUrl } = useLocalSearchParams<{ prestataireId?: string; nom?: string; avatarUrl?: string }>();
   const [messages, setMessage] = useState<MessageItem[]>([
     {
       type: "text",
@@ -78,7 +80,7 @@ export default function message() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={{ flex: 1, backgroundColor: "#fff" }}>
-        <ChatHearder nom="Konan Yves" avatarUrl={AVATAR_URL} enLigne />
+        <ChatHearder nom={nom ?? "Konan Yves"} avatarUrl={avatarUrl ?? AVATAR_URL} enLigne />
 
         <FlatList
           ref={flatListRef}

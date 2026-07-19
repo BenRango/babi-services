@@ -24,7 +24,7 @@ export default function ClientLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="accueil"
         options={{
           title: "Accueil",
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,

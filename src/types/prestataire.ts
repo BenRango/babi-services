@@ -1,3 +1,5 @@
+import { CategorieService } from "@/types/demande";
+
 export interface PrestataireResume {
   id: string;
   nom: string;
@@ -6,4 +8,6 @@ export interface PrestataireResume {
   nbAvis: number;
   distanceKm: number;
   metier: string;
+  categorie: CategorieService;
+  tarifHoraire: number;
 }

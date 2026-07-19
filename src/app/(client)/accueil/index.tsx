@@ -54,7 +54,7 @@ export default function Accueil() {
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Services populaires</Text>
-          <TouchableOpacity onPress={() => router.push("/(client)/demande/nouvelle")}>
+          <TouchableOpacity onPress={() => router.push("/(client)/accueil/services")}>
             <Text style={styles.sectionLink}>Voir tout</Text>
           </TouchableOpacity>
         </View>

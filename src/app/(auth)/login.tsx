@@ -48,7 +48,7 @@ export default function Login() {
 
       <Pressable
         style={styles.smsButton}
-        onPress={() => router.push("/(client)")}
+        onPress={() => router.push("/(client)/accueil")}
       >
         <Text style={styles.smsButtonText}>Recevoir le code SMS</Text>
       </Pressable>
