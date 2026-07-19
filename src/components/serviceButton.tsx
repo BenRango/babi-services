@@ -1,5 +1,6 @@
 import { Colors, Fonts } from '@/constants/theme'
 import { Image } from 'expo-image'
+import { ReactNode } from 'react'
 import { ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export interface ServiceButtonProps {
@@ -7,6 +8,7 @@ export interface ServiceButtonProps {
   selected?: boolean,
   onPress: () => void
   logoSource?: ImageSourcePropType
+  icon?: ReactNode
 }
 
 const styles = StyleSheet.create({
@@ -59,12 +61,12 @@ const ServiceButton = (props: ServiceButtonProps) => {
         onPress={props.onPress}
     >
         <View style={styles.imageContainer}>
-        {props.logoSource &&
+        {props.logoSource ? (
             <Image
                 source={props.logoSource} contentFit="contain"
                 style={styles.image}
             />
-        }
+        ) : props.icon}
         </View>
         <Text style={styles.title}>{props.title}</Text>
     </TouchableOpacity>

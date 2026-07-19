@@ -4,16 +4,24 @@ export type CategorieService =
   | "menage"
   | "climatisation"
   | "peinture"
-  | "menuiserie";
+  | "menuiserie"
+  | "autres";
 
 export type StatutDemande = "ouverte" | "en_cours" | "fermee" | "annulee";
 
 export type ModeRecherche = "libre" | "annonce_publique";
 
+export interface NoteVocale {
+  uri: string;
+  dureeSec: number;
+}
+
 export interface Demande {
   id: string;
   categorie: CategorieService;
   description: string;
+  noteVocale?: NoteVocale;
+  photos: string[];
   budgetMax: number;
   modeRecherche: ModeRecherche;
   statut: StatutDemande;
@@ -25,6 +33,8 @@ export interface Demande {
 export interface CreerDemandeInput {
   categorie: CategorieService;
   description: string;
+  noteVocale?: NoteVocale;
+  photos: string[];
   budgetMax: number;
   modeRecherche: ModeRecherche;
 }

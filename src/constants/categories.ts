@@ -17,6 +17,7 @@ export const CATEGORIES: CategorieMeta[] = [
 ];
 
 export function categorieLabel(id: CategorieService): string {
+  if (id === "autres") return "Autres";
   return CATEGORIES.find((c) => c.id === id)?.label ?? id;
 }
 

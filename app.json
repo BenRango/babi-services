@@ -39,6 +39,13 @@
           "microphonePermission": "Autoriser BabiServices à accéder au micro pour enregistrer des notes vocales."
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autoriser BabiServices à accéder à vos photos pour illustrer votre demande.",
+          "cameraPermission": "Autoriser BabiServices à accéder à l'appareil photo pour illustrer votre demande."
+        }
+      ],
       "expo-font"
     ],
     "experiments": {
