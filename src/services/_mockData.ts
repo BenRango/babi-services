@@ -1,3 +1,4 @@
+import { MessageItem } from "@/types/chat";
 import { Demande } from "@/types/demande";
 import { Offre } from "@/types/offre";
 import { Prestation } from "@/types/prestation";
@@ -100,6 +101,28 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
 export const demandes: Demande[] = [];
 export const offres: Offre[] = [];
 export const prestations: Prestation[] = [];
+
+export const conversations = new Map<string, MessageItem[]>([
+  [
+    "presta-1",
+    [
+      {
+        type: "text",
+        text: "Bonjour ! Comment puis-je vous aider ?",
+        moi: false,
+        heure: "10:12",
+        avatarUrl: PRESTATAIRES_POOL[0].avatarUrl,
+      },
+      {
+        type: "text",
+        text: "Salut ! Je cherche des informations sur React Native.",
+        moi: true,
+        heure: "10:13",
+        avatarUrl: "",
+      },
+    ],
+  ],
+]);
 
 export const wallet: Wallet = { soldeFcfa: 86500, soldeBloqueFcfa: 0 };
 

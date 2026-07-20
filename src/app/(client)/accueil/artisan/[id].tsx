@@ -17,14 +17,7 @@ export default function FicheArtisan() {
 
   const contacter = () => {
     if (!prestataire) return;
-    router.push({
-      pathname: "/(client)/message",
-      params: {
-        prestataireId: prestataire.id,
-        nom: prestataire.nom,
-        avatarUrl: prestataire.avatarUrl,
-      },
-    });
+    router.push(`/(client)/message/${prestataire.id}`);
   };
 
   return (

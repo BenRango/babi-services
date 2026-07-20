@@ -51,7 +51,10 @@ export default function SuiviPrestation() {
             <Text style={styles.providerNom}>{prestataire.nom}</Text>
             <Text style={styles.providerMetier}>{prestataire.metier}</Text>
           </View>
-          <TouchableOpacity style={styles.chatButton} onPress={() => router.push("/(client)/message")}>
+          <TouchableOpacity
+            style={styles.chatButton}
+            onPress={() => router.push(`/(client)/message/${prestataire.id}`)}
+          >
             <MessageCircle size={18} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
