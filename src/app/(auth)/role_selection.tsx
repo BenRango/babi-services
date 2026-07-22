@@ -1,3 +1,4 @@
+import { UserRole } from "@/types/user";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,24 +12,22 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import logo from "../../../assets/images/logo/BabiService_logo.png";
 
-type Role = "client" | "prestataire";
-
 const ROLES: {
-  id: Role;
+  id: UserRole;
   emoji: string;
   title: string;
   description: string;
   tags: string[];
 }[] = [
   {
-    id: "client",
+    id: UserRole.CLIENT,
     emoji: "🙋",
     title: "J'ai besoin d'un service",
     description: "Je cherche un prestataire de confiance.",
     tags: ["Créer des demandes", "Comparer les offres", "Payer en sécurité"],
   },
   {
-    id: "prestataire",
+    id: UserRole.PRESTATAIRE,
     emoji: "🔨",
     title: "Je propose mes services",
     description: "Je suis artisan ou prestataire.",
@@ -41,7 +40,7 @@ const ROLES: {
 ];
 
 export default function RoleSelection() {
-  const [selected, setSelected] = useState<Role>("client");
+  const [selected, setSelected] = useState<UserRole>(UserRole.CLIENT);
   const router = useRouter();
 
   return (
@@ -100,19 +99,21 @@ export default function RoleSelection() {
         <Pressable
           style={styles.continueButton}
           onPress={() => {
-            router.push("/login");
+            router.push({ pathname: "/register", params: { role: selected } });
           }}
         >
           <Text style={styles.continueButtonText}>
-            {selected === "client"
+            {selected === UserRole.CLIENT
               ? "Continuer comme client"
               : "Continuer comme prestataire"}
           </Text>
         </Pressable>
 
-        <Text style={styles.loginText}>
-          Déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
-        </Text>
+        <Pressable onPress={() => router.push("/login")}>
+          <Text style={styles.loginText}>
+            Déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

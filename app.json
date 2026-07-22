@@ -46,7 +46,8 @@
           "cameraPermission": "Autoriser BabiServices à accéder à l'appareil photo pour illustrer votre demande."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

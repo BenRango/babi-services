@@ -6,3 +6,18 @@ export interface Client {
   avatarUrl: string;
   commune: string;
 }
+
+export enum UserRole {
+  CLIENT = "client",
+  PRESTATAIRE = "prestataire",
+}
+
+export type StatutKyc = "non_verifie" | "en_cours" | "verifie";
+
+export interface User {
+  id: string;
+  nom: string;
+  telephone: string;
+  role: UserRole;
+  statutKyc: StatutKyc;
+}
