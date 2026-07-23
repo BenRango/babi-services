@@ -1,7 +1,11 @@
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
+import { useAsync } from "@/hooks/useAsync";
+import { StatutKyc } from "@/types/user";
+import { getStoredUser } from "@api/client";
+import { logout } from "@api/auth";
 import { useRouter } from "expo-router";
 import { Bell, ChevronRight, CircleHelp, LogOut, MapPin, User as UserIcon } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const MENU: { icon: typeof UserIcon; label: string }[] = [
@@ -11,8 +15,24 @@ const MENU: { icon: typeof UserIcon; label: string }[] = [
   { icon: CircleHelp, label: "Aide et support" },
 ];
 
+function kycMeta(statut?: StatutKyc): { label: string; color: string; background: string } {
+  if (statut === "verifie") return { label: "Vérifié", color: Colors.brand.vert, background: Colors.brand.tintVert };
+  if (statut === "en_cours") {
+    return { label: "Vérification en cours", color: Colors.brand.orange, background: Colors.brand.tintOr };
+  }
+  return { label: "Non vérifié", color: Colors.light.textSecondary, background: Colors.light.backgroundSelected };
+}
+
 export default function Profil() {
   const router = useRouter();
+  const { loading, data: user } = useAsync(getStoredUser);
+
+  const seDeconnecter = async () => {
+    await logout();
+    router.replace("/(auth)/login");
+  };
+
+  const kyc = kycMeta(user?.statutKyc);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -21,23 +41,33 @@ export default function Profil() {
           <View style={styles.avatar}>
             <UserIcon size={32} color={Colors.brand.orange} />
           </View>
-          <Text style={styles.name}>Amidou Koné</Text>
-          <Text style={styles.phone}>+225 07 00 00 00 00</Text>
+          {loading && !user ? (
+            <ActivityIndicator color={Colors.brand.orange} style={{ marginTop: Spacing.two }} />
+          ) : (
+            <>
+              <Text style={styles.name}>{user?.nom ?? "Utilisateur"}</Text>
+              <Text style={styles.phone}>{user?.telephone ?? ""}</Text>
+              <View style={[styles.kycBadge, { backgroundColor: kyc.background }]}>
+                <Text style={[styles.kycText, { color: kyc.color }]}>{kyc.label}</Text>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={styles.menu}>
           {MENU.map(({ icon: Icon, label }) => (
-            <Pressable key={label} style={styles.menuItem}>
+            <View key={label} style={styles.menuItem}>
               <View style={styles.menuIconWrap}>
                 <Icon size={16} color={Colors.brand.orange} />
               </View>
-              <Text style={styles.menuText}>{label}</Text>
-              <ChevronRight size={16} color={Colors.light.textSecondary} />
-            </Pressable>
+              <Text style={styles.menuTextDisabled}>{label}</Text>
+              <Text style={styles.bientot}>Bientôt disponible</Text>
+              <ChevronRight size={16} color={Colors.light.backgroundSelected} />
+            </View>
           ))}
         </View>
 
-        <Pressable style={styles.logoutButton} onPress={() => router.replace("/(auth)/login")}>
+        <Pressable style={styles.logoutButton} onPress={seDeconnecter}>
           <LogOut size={16} color="#E11D48" />
           <Text style={styles.logoutText}>Se déconnecter</Text>
         </Pressable>
@@ -78,6 +108,16 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     marginTop: 2,
   },
+  kycBadge: {
+    marginTop: Spacing.two,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  kycText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+  },
   menu: {
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Radii.md,
@@ -100,11 +140,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  menuText: {
+  menuTextDisabled: {
     flex: 1,
     fontFamily: Fonts.bodyMedium,
     fontSize: 14,
-    color: Colors.brand.encre,
+    color: Colors.light.textSecondary,
+  },
+  bientot: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    color: Colors.light.textSecondary,
   },
   logoutButton: {
     flexDirection: "row",
