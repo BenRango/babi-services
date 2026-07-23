@@ -55,7 +55,7 @@ export default function OffresDemande() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/(client)/demande")}>
           <ChevronLeft size={20} color={Colors.brand.encre} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ma demande</Text>
