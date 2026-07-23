@@ -2,6 +2,7 @@ import { CATEGORIES } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { getMesDemandes } from "@api/demandes";
+import { getStoredUser } from "@api/client";
 import { listPrestatairesRecommandes } from "@/services/prestataireService";
 import { DemandeStatut } from "@/types/demande";
 import { apercuDescription, formatFcfa } from "@/utils/format";
@@ -15,6 +16,8 @@ export default function Accueil() {
   const router = useRouter();
   const { data: prestataires } = useAsync(listPrestatairesRecommandes);
   const { data: demandes } = useAsync(getMesDemandes);
+  const { data: user } = useAsync(getStoredUser);
+  const prenom = user?.nom?.split(" ")[0];
 
   const demandeEnCours = demandes?.find(
     (d) => d.statut === DemandeStatut.EN_COURS || d.statut === DemandeStatut.FERMEE
@@ -35,7 +38,7 @@ export default function Accueil() {
               <MapPin size={12} color={Colors.brand.orange} />
               <Text style={styles.location}>Cocody, Abidjan</Text>
             </View>
-            <Text style={styles.greeting}>Bonjour 👋</Text>
+            <Text style={styles.greeting}>Bonjour{prenom ? ` ${prenom}` : ""} 👋</Text>
           </View>
           <View style={styles.bellButton}>
             <Bell size={19} color={Colors.brand.encre} />

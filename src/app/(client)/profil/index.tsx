@@ -1,19 +1,13 @@
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { StatutKyc } from "@/types/user";
-import { getStoredUser } from "@api/client";
 import { logout } from "@api/auth";
-import { useRouter } from "expo-router";
+import { getMe } from "@api/users";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Bell, ChevronRight, CircleHelp, LogOut, MapPin, User as UserIcon } from "lucide-react-native";
+import { useCallback } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const MENU: { icon: typeof UserIcon; label: string }[] = [
-  { icon: UserIcon, label: "Mes informations" },
-  { icon: MapPin, label: "Mes adresses" },
-  { icon: Bell, label: "Notifications" },
-  { icon: CircleHelp, label: "Aide et support" },
-];
 
 function kycMeta(statut?: StatutKyc): { label: string; color: string; background: string } {
   if (statut === "verifie") return { label: "Vérifié", color: Colors.brand.vert, background: Colors.brand.tintVert };
@@ -25,7 +19,20 @@ function kycMeta(statut?: StatutKyc): { label: string; color: string; background
 
 export default function Profil() {
   const router = useRouter();
-  const { loading, data: user } = useAsync(getStoredUser);
+  const { loading, data: user, reload } = useAsync(getMe);
+
+  const MENU = [
+    { icon: UserIcon, label: "Mes informations", onPress: () => router.push("/(client)/profil/informations") },
+    { icon: MapPin, label: "Mes adresses", onPress: undefined },
+    { icon: Bell, label: "Notifications", onPress: undefined },
+    { icon: CircleHelp, label: "Aide et support", onPress: () => router.push("/(client)/profil/aide") },
+  ];
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
 
   const seDeconnecter = async () => {
     await logout();
@@ -55,15 +62,15 @@ export default function Profil() {
         </View>
 
         <View style={styles.menu}>
-          {MENU.map(({ icon: Icon, label }) => (
-            <View key={label} style={styles.menuItem}>
+          {MENU.map(({ icon: Icon, label, onPress }) => (
+            <Pressable key={label} style={styles.menuItem} disabled={!onPress} onPress={onPress}>
               <View style={styles.menuIconWrap}>
                 <Icon size={16} color={Colors.brand.orange} />
               </View>
-              <Text style={styles.menuTextDisabled}>{label}</Text>
-              <Text style={styles.bientot}>Bientôt disponible</Text>
-              <ChevronRight size={16} color={Colors.light.backgroundSelected} />
-            </View>
+              <Text style={[styles.menuText, !onPress && styles.menuTextDisabled]}>{label}</Text>
+              {!onPress && <Text style={styles.bientot}>Bientôt disponible</Text>}
+              <ChevronRight size={16} color={onPress ? Colors.light.textSecondary : Colors.light.backgroundSelected} />
+            </Pressable>
           ))}
         </View>
 
@@ -140,10 +147,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  menuTextDisabled: {
+  menuText: {
     flex: 1,
     fontFamily: Fonts.bodyMedium,
     fontSize: 14,
+    color: Colors.brand.encre,
+  },
+  menuTextDisabled: {
     color: Colors.light.textSecondary,
   },
   bientot: {
