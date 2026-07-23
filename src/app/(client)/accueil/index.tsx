@@ -1,9 +1,10 @@
 import { CATEGORIES } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { listDemandes } from "@/services/demandeService";
+import { getMesDemandes } from "@api/demandes";
 import { listPrestatairesRecommandes } from "@/services/prestataireService";
-import { formatFcfa } from "@/utils/format";
+import { DemandeStatut } from "@/types/demande";
+import { apercuDescription, formatFcfa } from "@/utils/format";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Bell, ChevronRight, MapPin, Search, ShieldCheck, Star } from "lucide-react-native";
@@ -13,14 +14,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Accueil() {
   const router = useRouter();
   const { data: prestataires } = useAsync(listPrestatairesRecommandes);
-  const { data: demandes } = useAsync(listDemandes);
+  const { data: demandes } = useAsync(getMesDemandes);
 
-  const demandeEnCours = demandes?.find((d) => d.statut === "en_cours" || d.statut === "fermee");
+  const demandeEnCours = demandes?.find(
+    (d) => d.statut === DemandeStatut.EN_COURS || d.statut === DemandeStatut.FERMEE
+  );
 
+  // TODO Étape 4 : rediriger vers /suivi quand une prestation est confirmée.
   const ouvrirDemandeEnCours = () => {
     if (!demandeEnCours) return;
-    if (demandeEnCours.prestationId) router.push(`/(client)/demande/${demandeEnCours.id}/suivi`);
-    else router.push(`/(client)/demande/${demandeEnCours.id}/offres`);
+    router.push(`/(client)/demande/${demandeEnCours.id}/offres`);
   };
 
   return (
@@ -105,8 +108,8 @@ export default function Accueil() {
           <TouchableOpacity style={styles.activeCard} onPress={ouvrirDemandeEnCours}>
             <View style={{ flex: 1 }}>
               <Text style={styles.activeTitle}>Demande en cours</Text>
-              <Text style={styles.activeDescription} numberOfLines={1}>{demandeEnCours.description}</Text>
-              <Text style={styles.activeBudget}>Budget max : {formatFcfa(demandeEnCours.budgetMax)}</Text>
+              <Text style={styles.activeDescription} numberOfLines={1}>{apercuDescription(demandeEnCours)}</Text>
+              <Text style={styles.activeBudget}>Budget max : {formatFcfa(demandeEnCours.budgetMaxFcfa)}</Text>
             </View>
             <ChevronRight size={20} color={Colors.brand.orange} />
           </TouchableOpacity>

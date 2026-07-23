@@ -1,6 +1,5 @@
 import { MessageItem } from "@/types/chat";
 import { Demande } from "@/types/demande";
-import { Offre } from "@/types/offre";
 import { Prestation } from "@/types/prestation";
 import { PrestataireResume } from "@/types/prestataire";
 import { Transaction, Wallet } from "@/types/wallet";
@@ -99,7 +98,6 @@ export const PRESTATAIRES_POOL: PrestataireResume[] = [
 ];
 
 export const demandes: Demande[] = [];
-export const offres: Offre[] = [];
 export const prestations: Prestation[] = [];
 
 export const conversations = new Map<string, MessageItem[]>([

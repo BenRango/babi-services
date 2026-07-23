@@ -1,61 +1,33 @@
-import { CreerDemandeInput, Demande } from "@/types/demande";
-import { Offre } from "@/types/offre";
-import { PRESTATAIRES_POOL, delay, demandes, nextId, offres } from "./_mockData";
-
-export async function listDemandes(): Promise<Demande[]> {
-  return delay(
-    [...demandes].sort((a, b) => (a.dateCreation < b.dateCreation ? 1 : -1))
-  );
-}
-
-export async function getDemande(id: string): Promise<Demande> {
-  const demande = demandes.find((d) => d.id === id);
-  if (!demande) throw new Error("Demande introuvable");
-  return delay(demande);
-}
+import { CreerDemandeInput, Demande, DemandeMode, DemandeStatut, TypeDescription } from "@/types/demande";
+import { delay, demandes, nextId } from "./_mockData";
 
 /**
- * Crée la demande puis simule la réponse de 2 à 3 prestataires du pool —
- * un vrai backend renverrait juste la demande "ouverte" ; les offres
- * arriveraient plus tard via la liste `listOffresForDemande`.
+ * Mock temporaire tant que l'Étape 3 ne branche pas POST /demandes (multipart) —
+ * la lecture (Mes demandes, détail) utilise déjà l'API réelle, donc une demande
+ * créée ici n'apparaîtra pas dans ces écrans avant l'Étape 3.
  */
 export async function createDemande(input: CreerDemandeInput): Promise<Demande> {
   const demande: Demande = {
     id: nextId("demande"),
-    ...input,
-    statut: "en_cours",
-    dateCreation: new Date().toISOString(),
-    offresCount: 0,
+    clientId: "mock-client",
+    categorie: input.categorie,
+    picture_url: input.photos[0] ?? null,
+    typeDescription: input.noteVocale ? TypeDescription.AUDIO : TypeDescription.TEXT,
+    description: input.noteVocale?.uri ?? input.description,
+    budgetMaxFcfa: input.budgetMax,
+    mode: input.modeRecherche === "libre" ? DemandeMode.RECHERCHE : DemandeMode.POST_PUBLIC,
+    statut: DemandeStatut.OUVERTE,
+    expireAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    offres: [],
   };
   demandes.push(demande);
-
-  const nbOffres = 2 + Math.floor(Math.random() * 2);
-  const candidats = [...PRESTATAIRES_POOL]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, nbOffres);
-
-  candidats.forEach((prestataire, index) => {
-    const offre: Offre = {
-      id: nextId("offre"),
-      demandeId: demande.id,
-      prestataire,
-      prix: Math.round((input.budgetMax * (0.75 + Math.random() * 0.35)) / 500) * 500,
-      delaiHeures: 1 + Math.floor(Math.random() * 5),
-      message: "Disponible rapidement, travail soigné et garanti.",
-      statut: "en_attente",
-      dateEnvoi: new Date().toISOString(),
-      recommandee: index === 0,
-    };
-    offres.push(offre);
-  });
-  demande.offresCount = nbOffres;
-
   return delay(demande, 900);
 }
 
 export async function annulerDemande(id: string): Promise<void> {
   const demande = demandes.find((d) => d.id === id);
   if (!demande) throw new Error("Demande introuvable");
-  demande.statut = "annulee";
+  demande.statut = DemandeStatut.ANNULEE;
   return delay(undefined, 400);
 }

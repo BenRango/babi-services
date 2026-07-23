@@ -1,3 +1,10 @@
+import { TypeDescription } from "@/types/demande";
+
+export function apercuDescription(demande: { typeDescription: TypeDescription; description?: string }): string {
+  if (demande.typeDescription === TypeDescription.AUDIO) return "🎤 Note vocale";
+  return demande.description?.trim() || "Sans description";
+}
+
 export function formatFcfa(amount: number): string {
   const digits = Math.round(amount).toString().split("").reverse();
   const grouped: string[] = [];
@@ -6,6 +13,15 @@ export function formatFcfa(amount: number): string {
     grouped.push(digit);
   });
   return `${grouped.reverse().join("")} FCFA`;
+}
+
+export function formatDelai(delaiMinutes: number): string {
+  if (delaiMinutes <= 20) return "Dès maintenant";
+  if (delaiMinutes < 60) return `Dans ${delaiMinutes} min`;
+  const heures = Math.round(delaiMinutes / 60);
+  if (heures === 1) return "Dans 1h";
+  if (heures < 6) return `Dans ${heures}h`;
+  return "Cet après-midi";
 }
 
 export function formatDateRelative(iso: string): string {

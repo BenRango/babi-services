@@ -1,42 +1,106 @@
+import BadgeArtisanChip from "@/components/badgeArtisanChip";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
-import { Offre } from "@/types/offre";
-import { formatFcfa } from "@/utils/format";
-import { Image } from "expo-image";
-import { Star } from "lucide-react-native";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Offre, OffreStatut } from "@/types/offre";
+import { couleurAvatar, initiales } from "@/utils/avatar";
+import { formatDelai, formatFcfa } from "@/utils/format";
+import { useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface OffreCardProps {
   offre: Offre;
-  onPress: () => void;
+  meilleurPrix?: boolean;
+  onAccepter: () => Promise<void>;
+  onRefuser: () => Promise<void>;
 }
 
-export default function OffreCard({ offre, onPress }: OffreCardProps) {
+function statutResolu(statut: OffreStatut): { label: string; color: string } | null {
+  if (statut === OffreStatut.ACCEPTEE) return { label: "✓ Offre acceptée", color: Colors.brand.vert };
+  if (statut === OffreStatut.REFUSEE) return { label: "Offre refusée", color: Colors.light.textSecondary };
+  if (statut === OffreStatut.EXPIREE) return { label: "Offre expirée", color: Colors.light.textSecondary };
+  return null;
+}
+
+export default function OffreCard({ offre, meilleurPrix, onAccepter, onRefuser }: OffreCardProps) {
+  const [enCours, setEnCours] = useState<"accepter" | "refuser" | null>(null);
   const { prestataire } = offre;
+  const nom = prestataire?.nom ?? "Prestataire";
+  const resolu = statutResolu(offre.statut);
+
+  const accepter = async () => {
+    setEnCours("accepter");
+    try {
+      await onAccepter();
+    } finally {
+      setEnCours(null);
+    }
+  };
+
+  const refuser = async () => {
+    setEnCours("refuser");
+    try {
+      await onRefuser();
+    } finally {
+      setEnCours(null);
+    }
+  };
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      {offre.recommandee && (
-        <View style={styles.recommandeeBar}>
-          <Text style={styles.recommandeeText}>Recommandée · Meilleur rapport qualité/prix</Text>
+    <View style={styles.card}>
+      {meilleurPrix && (
+        <View style={styles.meilleurPrixBadge}>
+          <Text style={styles.meilleurPrixText}>Meilleur prix</Text>
         </View>
       )}
+
       <View style={styles.body}>
-        <Image source={{ uri: prestataire.avatarUrl }} style={styles.avatar} contentFit="cover" />
+        <View style={[styles.avatar, { backgroundColor: couleurAvatar(prestataire?.id ?? nom) }]}>
+          <Text style={styles.avatarText}>{initiales(nom)}</Text>
+        </View>
         <View style={styles.info}>
-          <Text style={styles.nom}>{prestataire.nom}</Text>
-          <Text style={styles.metier}>{prestataire.metier}</Text>
-          <View style={styles.row}>
-            <Star size={12} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.note}>{prestataire.note}</Text>
-            <Text style={styles.nbAvis}>({prestataire.nbAvis})</Text>
-            <Text style={styles.distance}>· {prestataire.distanceKm} km</Text>
+          <View style={styles.nomRow}>
+            <Text style={styles.nom}>{nom}</Text>
+            {prestataire?.badge && <BadgeArtisanChip badge={prestataire.badge} />}
           </View>
+          <Text style={styles.delai}>{formatDelai(offre.delaiMinutes)}</Text>
         </View>
-        <View style={styles.priceBlock}>
-          <Text style={styles.prix}>{formatFcfa(offre.prix)}</Text>
-          <Text style={styles.delai}>~{offre.delaiHeures}h</Text>
-        </View>
+        <Text style={styles.prix}>{formatFcfa(offre.prixProposeFcfa)}</Text>
       </View>
-    </TouchableOpacity>
+
+      {offre.message && (
+        <View style={styles.messageBox}>
+          <Text style={styles.message}>« {offre.message.trim()} »</Text>
+        </View>
+      )}
+
+      {resolu ? (
+        <Text style={[styles.statutResolu, { color: resolu.color }]}>{resolu.label}</Text>
+      ) : (
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.refuserButton]}
+            onPress={refuser}
+            disabled={enCours !== null}
+          >
+            {enCours === "refuser" ? (
+              <ActivityIndicator color={Colors.brand.encre} />
+            ) : (
+              <Text style={styles.refuserText}>Refuser</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.accepterButton]}
+            onPress={accepter}
+            disabled={enCours !== null}
+          >
+            {enCours === "accepter" ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.accepterText}>Accepter</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -44,7 +108,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Radii.md,
-    overflow: "hidden",
+    padding: Spacing.three,
     marginBottom: Spacing.three,
     shadowColor: "#000",
     shadowOpacity: 0.08,
@@ -52,75 +116,105 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  recommandeeBar: {
-    backgroundColor: Colors.brand.orange,
-    paddingVertical: 6,
-    paddingHorizontal: Spacing.three,
+  meilleurPrixBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: Colors.brand.tintVert,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginBottom: Spacing.two,
   },
-  recommandeeText: {
+  meilleurPrixText: {
     fontFamily: Fonts.bodyBold,
     fontSize: 11,
-    color: "#FFFFFF",
+    color: Colors.brand.vert,
   },
   body: {
     flexDirection: "row",
-    padding: Spacing.three,
     alignItems: "center",
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: Radii.sm,
-    backgroundColor: Colors.brand.tintOr,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 15,
+    color: "#FFFFFF",
   },
   info: {
     flex: 1,
     marginLeft: Spacing.two,
+    gap: 4,
+  },
+  nomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   nom: {
     fontFamily: Fonts.titleSemiBold,
     fontSize: 15,
     color: Colors.brand.encre,
   },
-  metier: {
+  delai: {
     fontFamily: Fonts.body,
     fontSize: 12,
     color: Colors.light.textSecondary,
-    marginTop: 1,
-    marginBottom: 4,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  note: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12,
-    color: Colors.brand.encre,
-  },
-  nbAvis: {
-    fontFamily: Fonts.body,
-    fontSize: 11,
-    color: Colors.light.textSecondary,
-  },
-  distance: {
-    fontFamily: Fonts.body,
-    fontSize: 11,
-    color: Colors.light.textSecondary,
-  },
-  priceBlock: {
-    alignItems: "flex-end",
   },
   prix: {
     fontFamily: Fonts.title,
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.brand.orange,
   },
-  delai: {
+  messageBox: {
+    backgroundColor: Colors.brand.fond,
+    borderRadius: Radii.sm,
+    padding: Spacing.two,
+    marginTop: Spacing.three,
+  },
+  message: {
     fontFamily: Fonts.body,
-    fontSize: 11,
-    color: Colors.light.textSecondary,
-    marginTop: 2,
+    fontSize: 13,
+    color: Colors.brand.encre,
+    fontStyle: "italic",
+    lineHeight: 18,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: Spacing.two,
+    marginTop: Spacing.three,
+  },
+  actionButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: Radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  refuserButton: {
+    backgroundColor: Colors.light.backgroundSelected,
+  },
+  refuserText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 14,
+    color: Colors.brand.encre,
+  },
+  accepterButton: {
+    backgroundColor: Colors.brand.vert,
+  },
+  accepterText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 14,
+    color: "#FFFFFF",
+  },
+  statutResolu: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: Spacing.three,
   },
 });

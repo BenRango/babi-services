@@ -1,15 +1,26 @@
-import { PrestataireResume } from "@/types/prestataire";
+import { BadgeArtisan, StatutKyc } from "@/types/user";
 
-export type StatutOffre = "en_attente" | "acceptee" | "refusee" | "expiree";
+export enum OffreStatut {
+  EN_ATTENTE = "en_attente",
+  ACCEPTEE = "acceptee",
+  REFUSEE = "refusee",
+  EXPIREE = "expiree",
+}
+
+export interface OffrePrestataire {
+  id: string;
+  nom: string;
+  telephone: string;
+  statutKyc: StatutKyc;
+  badge: BadgeArtisan;
+}
 
 export interface Offre {
   id: string;
-  demandeId: string;
-  prestataire: PrestataireResume;
-  prix: number;
-  delaiHeures: number;
+  prestataire?: OffrePrestataire;
+  prixProposeFcfa: number;
+  delaiMinutes: number;
   message: string;
-  statut: StatutOffre;
-  dateEnvoi: string;
-  recommandee?: boolean;
+  statut: OffreStatut;
+  createdAt: string;
 }

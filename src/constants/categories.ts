@@ -16,11 +16,11 @@ export const CATEGORIES: CategorieMeta[] = [
   { id: "menuiserie", label: "Menuiserie", icon: require("@/assets/icons/carpenter.svg") },
 ];
 
-export function categorieLabel(id: CategorieService): string {
+export function categorieLabel(id: string): string {
   if (id === "autres") return "Autres";
   return CATEGORIES.find((c) => c.id === id)?.label ?? id;
 }
 
-export function categorieIcon(id: CategorieService): ImageSourcePropType | undefined {
+export function categorieIcon(id: string): ImageSourcePropType | undefined {
   return CATEGORIES.find((c) => c.id === id)?.icon;
 }

@@ -14,6 +14,13 @@ export enum UserRole {
 
 export type StatutKyc = "non_verifie" | "en_cours" | "verifie";
 
+export enum BadgeArtisan {
+  BRONZE = "bronze",
+  ARGENT = "argent",
+  OR = "or",
+  DIAMANT = "diamant",
+}
+
 export interface User {
   id: string;
   nom: string;
