@@ -42,23 +42,3 @@ export interface Demande {
   createdAt: string;
   offres: Offre[];
 }
-
-/**
- * Forme encore utilisée par le formulaire de création (mock, en attendant
- * l'Étape 3 qui le branchera sur POST /demandes en multipart).
- */
-export type ModeRecherche = "libre" | "annonce_publique";
-
-export interface NoteVocale {
-  uri: string;
-  dureeSec: number;
-}
-
-export interface CreerDemandeInput {
-  categorie: CategorieService;
-  description: string;
-  noteVocale?: NoteVocale;
-  photos: string[];
-  budgetMax: number;
-  modeRecherche: ModeRecherche;
-}

@@ -2,20 +2,39 @@ import AudioBubble from "@/components/audioBubble";
 import ContinuerButton from "@/components/continuerButton";
 import InputComponent from "@/components/input-component";
 import ServiceButton from "@/components/serviceButton";
-import { CATEGORIES } from "@/constants/categories";
+import { CATEGORIES, categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { VoiceRecording, useVoiceRecorder } from "@/hooks/useVoiceRecorder";
-import { createDemande } from "@/services/demandeService";
-import { CategorieService, ModeRecherche } from "@/types/demande";
+import { CategorieService, Demande, DemandeMode, TypeDescription } from "@/types/demande";
+import { apercuDescription, formatFcfa } from "@/utils/format";
+import { createDemande } from "@api/demandes";
+import { isAxiosError } from "axios";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Camera, ChevronLeft, Mic, MoreHorizontal, Megaphone, Search, Square, Trash2, X } from "lucide-react-native";
+import {
+  Camera,
+  Check,
+  ChevronLeft,
+  Mic,
+  MoreHorizontal,
+  Megaphone,
+  Search,
+  Square,
+  Trash2,
+  X,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const SUGGESTIONS_BUDGET = [5000, 10000, 20000, 50000];
+
+interface PhotoChoisie {
+  uri: string;
+  mimeType?: string | null;
+  fileName?: string | null;
+}
 
 export default function NouvelleDemande() {
   const router = useRouter();
@@ -23,8 +42,11 @@ export default function NouvelleDemande() {
   const [categorie, setCategorie] = useState<CategorieService>(categorieInitiale ?? "plomberie");
   const [description, setDescription] = useState("");
   const [budgetMax, setBudgetMax] = useState<string>("");
-  const [modeRecherche, setModeRecherche] = useState<ModeRecherche>("annonce_publique");
+  const [commune, setCommune] = useState("");
+  const [mode, setMode] = useState<DemandeMode>(DemandeMode.POST_PUBLIC);
   const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [demandeCreee, setDemandeCreee] = useState<Demande | null>(null);
 
   const { isRecording, durationMillis, start, stop } = useVoiceRecorder();
   const [demarrageMicro, setDemarrageMicro] = useState(false);
@@ -51,7 +73,7 @@ export default function NouvelleDemande() {
     if (recording) setNoteVocale(recording);
   };
 
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photo, setPhoto] = useState<PhotoChoisie | null>(null);
 
   const prendrePhoto = async () => {
     const { granted } = await ImagePicker.requestCameraPermissionsAsync();
@@ -61,58 +83,106 @@ export default function NouvelleDemande() {
     }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.6 });
     if (!result.canceled) {
-      setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+      const asset = result.assets[0];
+      setPhoto({ uri: asset.uri, mimeType: asset.mimeType, fileName: asset.fileName });
     }
   };
 
-  const choisirPhotos = async () => {
+  const choisirPhoto = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
       Alert.alert("Galerie indisponible", "Autorisez l'accès à vos photos pour en ajouter à votre demande.");
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.6,
-      allowsMultipleSelection: true,
-    });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.6 });
     if (!result.canceled) {
-      setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+      const asset = result.assets[0];
+      setPhoto({ uri: asset.uri, mimeType: asset.mimeType, fileName: asset.fileName });
     }
   };
 
   const demanderPhoto = () => {
     Alert.alert("Ajouter une photo", undefined, [
       { text: "Prendre une photo", onPress: prendrePhoto },
-      { text: "Choisir depuis la galerie", onPress: choisirPhotos },
+      { text: "Choisir depuis la galerie", onPress: choisirPhoto },
       { text: "Annuler", style: "cancel" },
     ]);
   };
 
-  const retirerPhoto = (uri: string) => {
-    setPhotos((prev) => prev.filter((p) => p !== uri));
-  };
-
   const budgetValide = /^[0-9]{3,}$/.test(budgetMax);
-  const formValide = budgetValide && photos.length > 0;
+  const descriptionValide = description.trim().length > 0 || noteVocale !== null;
+  const formValide = budgetValide && descriptionValide;
 
   const soumettre = async () => {
     if (!formValide || envoi) return;
     setEnvoi(true);
+    setErreur(null);
     try {
       const demande = await createDemande({
         categorie,
-        description: description.trim(),
-        noteVocale: noteVocale ?? undefined,
-        photos,
-        budgetMax: parseInt(budgetMax, 10),
-        modeRecherche,
+        budgetMaxFcfa: parseInt(budgetMax, 10),
+        commune: commune.trim() || undefined,
+        mode,
+        typeDescription: noteVocale ? TypeDescription.AUDIO : TypeDescription.TEXT,
+        description: description.trim() || undefined,
+        audio: noteVocale ? { uri: noteVocale.uri } : undefined,
+        photo: photo ?? undefined,
       });
-      router.replace(`/(client)/demande/${demande.id}/offres`);
+      setDemandeCreee(demande);
+    } catch (e) {
+      const message = isAxiosError(e) ? e.response?.data?.message : undefined;
+      setErreur(typeof message === "string" ? message : "Impossible de publier votre demande pour l'instant.");
     } finally {
       setEnvoi(false);
     }
   };
+
+  if (demandeCreee) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <ScrollView contentContainerStyle={styles.receiptScroll}>
+          <View style={styles.receiptIcon}>
+            <Check size={32} color={Colors.brand.vert} />
+          </View>
+          <Text style={styles.receiptTitle}>Demande publiée !</Text>
+          <Text style={styles.receiptSubtitle}>
+            Les prestataires disponibles vont pouvoir vous envoyer leurs offres.
+          </Text>
+
+          <View style={styles.receiptCard}>
+            <View style={styles.receiptRow}>
+              <Text style={styles.receiptLabel}>Service</Text>
+              <Text style={styles.receiptValue}>{categorieLabel(demandeCreee.categorie)}</Text>
+            </View>
+            <View style={styles.receiptRow}>
+              <Text style={styles.receiptLabel}>Budget max</Text>
+              <Text style={styles.receiptValue}>{formatFcfa(demandeCreee.budgetMaxFcfa)}</Text>
+            </View>
+            {demandeCreee.commune && (
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptLabel}>Commune</Text>
+                <Text style={styles.receiptValue}>{demandeCreee.commune}</Text>
+              </View>
+            )}
+            <Text style={styles.receiptLabel}>Description</Text>
+            <Text style={styles.receiptDescription}>{apercuDescription(demandeCreee)}</Text>
+          </View>
+
+          <ContinuerButton
+            filled
+            text="Voir mon annonce"
+            onPress={() => router.replace(`/(client)/demande/${demandeCreee.id}/offres`)}
+            style={styles.submit}
+          />
+          <ContinuerButton
+            text="Retour à mes demandes"
+            onPress={() => router.replace("/(client)/demande")}
+            style={styles.submit}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -148,10 +218,8 @@ export default function NouvelleDemande() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Décrivez le problème</Text>
-        <Text style={styles.sectionHint}>
-          Par texte, note vocale et/ou photos — au moins une photo est requise.
-        </Text>
+        <Text style={styles.sectionTitle}>Décrivez le problème*</Text>
+        <Text style={styles.sectionHint}>Par texte et/ou note vocale — au moins l&apos;un des deux.</Text>
         <InputComponent
           value={description}
           placeholder="Ex : Mon lavabo est bouché depuis hier, l'eau ne coule plus..."
@@ -188,24 +256,27 @@ export default function NouvelleDemande() {
           </TouchableOpacity>
         )}
 
-        <Text style={styles.sectionTitle}>Photos du problème*</Text>
-        <Text style={styles.sectionHint}>
-          Ajoutez au moins une photo pour aider le prestataire à comprendre le problème d&apos;un coup d&apos;œil.
-        </Text>
+        <Text style={styles.sectionTitle}>Photo du problème</Text>
+        <Text style={styles.sectionHint}>Facultatif — aide le prestataire à comprendre en un coup d&apos;œil.</Text>
         <View style={styles.photosGrid}>
-          {photos.map((uri) => (
-            <View key={uri} style={styles.photoThumbWrap}>
-              <Image source={{ uri }} style={styles.photoThumb} contentFit="cover" />
-              <TouchableOpacity style={styles.photoRemove} onPress={() => retirerPhoto(uri)}>
+          {photo && (
+            <View style={styles.photoThumbWrap}>
+              <Image source={{ uri: photo.uri }} style={styles.photoThumb} contentFit="cover" />
+              <TouchableOpacity style={styles.photoRemove} onPress={() => setPhoto(null)}>
                 <X size={12} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
-          ))}
-          <TouchableOpacity style={styles.photoAddTile} onPress={demanderPhoto}>
-            <Camera size={22} color={Colors.brand.orange} />
-            <Text style={styles.photoAddText}>Ajouter</Text>
-          </TouchableOpacity>
+          )}
+          {!photo && (
+            <TouchableOpacity style={styles.photoAddTile} onPress={demanderPhoto}>
+              <Camera size={22} color={Colors.brand.orange} />
+              <Text style={styles.photoAddText}>Ajouter</Text>
+            </TouchableOpacity>
+          )}
         </View>
+
+        <Text style={styles.sectionTitle}>Commune</Text>
+        <InputComponent value={commune} placeholder="Ex : Cocody" onChangeText={setCommune} />
 
         <Text style={styles.sectionTitle}>Budget maximum*</Text>
         <View style={styles.budgetRow}>
@@ -232,8 +303,8 @@ export default function NouvelleDemande() {
 
         <Text style={styles.sectionTitle}>Comment trouver votre prestataire ?*</Text>
         <TouchableOpacity
-          style={[styles.modeCard, modeRecherche === "libre" && styles.modeCardSelected]}
-          onPress={() => setModeRecherche("libre")}
+          style={[styles.modeCard, mode === DemandeMode.RECHERCHE && styles.modeCardSelected]}
+          onPress={() => setMode(DemandeMode.RECHERCHE)}
         >
           <View style={styles.modeIcon}>
             <Search size={20} color={Colors.brand.orange} />
@@ -244,8 +315,8 @@ export default function NouvelleDemande() {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.modeCard, modeRecherche === "annonce_publique" && styles.modeCardSelected]}
-          onPress={() => setModeRecherche("annonce_publique")}
+          style={[styles.modeCard, mode === DemandeMode.POST_PUBLIC && styles.modeCardSelected]}
+          onPress={() => setMode(DemandeMode.POST_PUBLIC)}
         >
           <View style={styles.modeIcon}>
             <Megaphone size={20} color={Colors.brand.orange} />
@@ -255,6 +326,8 @@ export default function NouvelleDemande() {
             <Text style={styles.modeSubtitle}>Les prestataires disponibles vous envoient une offre.</Text>
           </View>
         </TouchableOpacity>
+
+        {erreur && <Text style={styles.erreur}>{erreur}</Text>}
 
         <ContinuerButton
           filled
@@ -503,8 +576,71 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     marginTop: 2,
   },
+  erreur: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: "#DC2626",
+    marginTop: Spacing.three,
+  },
   submit: {
     width: "100%",
     marginTop: Spacing.four,
+  },
+  receiptScroll: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.six,
+    paddingBottom: Spacing.six,
+    alignItems: "center",
+  },
+  receiptIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.brand.tintVert,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.three,
+  },
+  receiptTitle: {
+    fontFamily: Fonts.title,
+    fontSize: 20,
+    color: Colors.brand.encre,
+  },
+  receiptSubtitle: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: Spacing.four,
+  },
+  receiptCard: {
+    width: "100%",
+    backgroundColor: Colors.light.backgroundElement,
+    borderRadius: Radii.md,
+    padding: Spacing.three,
+    marginBottom: Spacing.four,
+  },
+  receiptRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: Spacing.two,
+  },
+  receiptLabel: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+  },
+  receiptValue: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 13,
+    color: Colors.brand.encre,
+  },
+  receiptDescription: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: Colors.brand.encre,
+    marginTop: 4,
+    lineHeight: 19,
   },
 });
