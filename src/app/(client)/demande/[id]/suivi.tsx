@@ -1,25 +1,28 @@
-import MapSection from "@/components/mapSection";
+import DemandeDescription from "@/components/demandeDescription";
 import Timeline from "@/components/timeline";
+import { categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { avancerStatut, getPrestationByDemande } from "@/services/prestationService";
 import { formatFcfa } from "@/utils/format";
-import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, MessageCircle, ShieldCheck } from "lucide-react-native";
+import { getMesPrestations } from "@api/prestations";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { CheckCircle2, ChevronLeft, KeyRound, ShieldCheck, User } from "lucide-react-native";
+import { useCallback } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SuiviPrestation() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { loading, data: prestation, reload } = useAsync(() => getPrestationByDemande(id), [id]);
+  const { loading, data: prestations, reload } = useAsync(getMesPrestations);
 
-  const avancer = async () => {
-    if (!prestation) return;
-    await avancerStatut(prestation.id);
-    reload();
-  };
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
+  const prestation = prestations?.find((p) => p.offre.demande.id === id);
 
   if (loading && !prestation) {
     return (
@@ -30,62 +33,56 @@ export default function SuiviPrestation() {
   }
 
   if (!prestation) return null;
-  const { prestataire } = prestation;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/(client)/demande")}>
           <ChevronLeft size={20} color={Colors.brand.encre} />
         </TouchableOpacity>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Suivi de la mission</Text>
-          <Text style={styles.subtitle}>Prestataire en intervention</Text>
-        </View>
+        <Text style={styles.headerTitle}>Suivi de la mission</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.providerCard}>
-          <Image source={{ uri: prestataire.avatarUrl }} style={styles.avatar} contentFit="cover" />
-          <View style={styles.providerInfo}>
-            <Text style={styles.providerNom}>{prestataire.nom}</Text>
-            <Text style={styles.providerMetier}>{prestataire.metier}</Text>
+          <View style={styles.avatar}>
+            <User size={22} color={Colors.brand.orange} />
           </View>
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={() => router.push(`/(client)/message/${prestataire.id}`)}
-          >
-            <MessageCircle size={18} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.providerNom}>{prestation.prestataire.nom}</Text>
+            <Text style={styles.providerMetier}>{categorieLabel(prestation.offre.demande.categorie)}</Text>
+          </View>
         </View>
 
-        {prestation.statut === "en_route" && (
-          <MapSection prestataireNom={prestataire.nom} arriveeEstimee="12 min" />
-        )}
+        <DemandeDescription demande={prestation.offre.demande} textStyle={styles.description} />
 
         <View style={styles.timelineCard}>
-          <Timeline
-            historique={prestation.historique}
-            statutActuel={prestation.statut}
-            onAvancer={prestation.statut !== "terminee" ? avancer : undefined}
-          />
+          <Timeline historique={[]} statutActuel={prestation.statut} />
         </View>
 
         <View style={styles.paymentInfo}>
           <ShieldCheck size={18} color={Colors.brand.vert} />
           <Text style={styles.paymentInfoText}>
-            {formatFcfa(prestation.montant)} sera libéré au prestataire uniquement après validation du code de
+            {formatFcfa(prestation.montantFcfa)} sera libéré au prestataire uniquement après validation du code de
             confirmation.
           </Text>
         </View>
 
-        {prestation.statut === "terminee" && (
+        {prestation.codeConfirmation && (
           <TouchableOpacity
             style={styles.codeButton}
             onPress={() => router.push(`/(client)/demande/${id}/code-confirmation`)}
           >
+            <KeyRound size={16} color="#FFFFFF" />
             <Text style={styles.codeButtonText}>Voir mon code de confirmation</Text>
           </TouchableOpacity>
+        )}
+
+        {prestation.statut === "terminee" && (
+          <View style={styles.successBlock}>
+            <CheckCircle2 size={40} color={Colors.brand.vert} />
+            <Text style={styles.successText}>Prestation terminée.</Text>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -116,18 +113,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerText: {
-    flex: 1,
-  },
-  title: {
+  headerTitle: {
     fontFamily: Fonts.title,
     fontSize: 17,
     color: Colors.brand.encre,
-  },
-  subtitle: {
-    fontFamily: Fonts.body,
-    fontSize: 12,
-    color: Colors.light.textSecondary,
   },
   scroll: {
     paddingHorizontal: Spacing.four,
@@ -136,20 +125,19 @@ const styles = StyleSheet.create({
   providerCard: {
     flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.two,
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Radii.md,
     padding: Spacing.three,
-    marginBottom: Spacing.three,
-    gap: Spacing.two,
+    marginBottom: Spacing.two,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: Colors.brand.tintOr,
-  },
-  providerInfo: {
-    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   providerNom: {
     fontFamily: Fonts.titleSemiBold,
@@ -160,14 +148,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: 12,
     color: Colors.light.textSecondary,
+    marginTop: 1,
   },
-  chatButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.brand.orange,
-    alignItems: "center",
-    justifyContent: "center",
+  description: {
+    marginBottom: Spacing.three,
   },
   timelineCard: {
     backgroundColor: Colors.light.backgroundElement,
@@ -192,14 +176,27 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   codeButton: {
+    flexDirection: "row",
+    gap: 8,
     backgroundColor: Colors.brand.orange,
     borderRadius: Radii.lg,
     paddingVertical: Spacing.three,
     alignItems: "center",
+    justifyContent: "center",
   },
   codeButtonText: {
     fontFamily: Fonts.bodyBold,
     fontSize: 15,
     color: "#FFFFFF",
+  },
+  successBlock: {
+    alignItems: "center",
+    gap: Spacing.two,
+    marginTop: Spacing.three,
+  },
+  successText: {
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 14,
+    color: Colors.brand.encre,
   },
 });

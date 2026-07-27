@@ -3,6 +3,7 @@ import EmptyState from "@/components/emptyState";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { getMesDemandes } from "@api/demandes";
+import { getMesPrestations } from "@api/prestations";
 import { Demande, DemandeStatut } from "@/types/demande";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
@@ -32,20 +33,35 @@ const FILTRES: { id: Filtre; label: string }[] = [
 export default function MesDemandes() {
   const router = useRouter();
   const { loading, error, data, reload } = useAsync(getMesDemandes);
+  const { data: prestations, reload: reloadPrestations } = useAsync(getMesPrestations);
   const [filtre, setFiltre] = useState<Filtre>("toutes");
 
   useFocusEffect(
     useCallback(() => {
       reload();
-    }, [reload])
+      reloadPrestations();
+    }, [reload, reloadPrestations])
   );
 
-  const demandesFiltrees = (data ?? []).filter((d) => filtre === "toutes" || d.statut === filtre);
+  // Demande.statut ne passe jamais à "fermee" tout seul quand la prestation se
+  // termine — on croise avec Prestation.statut pour savoir si c'est vraiment fini.
+  const prestationParDemande = new Map((prestations ?? []).map((p) => [p.offre.demande.id, p]));
 
-  // TODO Étape 4 : rediriger vers /suivi quand la demande a une prestation confirmée
-  // (pas encore de lien demande → prestation exposé par l'API).
+  const statutAffiche = (demande: Demande): DemandeStatut => {
+    if (prestationParDemande.get(demande.id)?.statut === "terminee") return DemandeStatut.FERMEE;
+    return demande.statut;
+  };
+
+  const demandesFiltrees = (data ?? []).filter(
+    (d) => filtre === "toutes" || statutAffiche(d) === filtre
+  );
+
   const ouvrirDemande = (demande: Demande) => {
-    router.push(`/(client)/demande/${demande.id}/offres`);
+    if (prestationParDemande.has(demande.id)) {
+      router.push(`/(client)/demande/${demande.id}/suivi`);
+    } else {
+      router.push(`/(client)/demande/${demande.id}/offres`);
+    }
   };
 
   const creerDemande = () => router.push("/(client)/demande/nouvelle");
@@ -104,7 +120,9 @@ export default function MesDemandes() {
           data={demandesFiltrees}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <DemandeCard demande={item} onPress={() => ouvrirDemande(item)} />}
+          renderItem={({ item }) => (
+            <DemandeCard demande={{ ...item, statut: statutAffiche(item) }} onPress={() => ouvrirDemande(item)} />
+          )}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} tintColor={Colors.brand.orange} />}
         />
       )}

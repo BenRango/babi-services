@@ -23,10 +23,9 @@ export default function Accueil() {
     (d) => d.statut === DemandeStatut.EN_COURS || d.statut === DemandeStatut.FERMEE
   );
 
-  // TODO Étape 4 : rediriger vers /suivi quand une prestation est confirmée.
   const ouvrirDemandeEnCours = () => {
     if (!demandeEnCours) return;
-    router.push(`/(client)/demande/${demandeEnCours.id}/offres`);
+    router.push(`/(client)/demande/${demandeEnCours.id}/suivi`);
   };
 
   return (

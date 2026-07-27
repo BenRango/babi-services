@@ -1,4 +1,5 @@
 import logo from "@/assets/images/logo/BabiService_logo.png";
+import { UserRole } from "@/types/user";
 import { login } from "@api/auth";
 import { isAxiosError } from "axios";
 import { useRouter } from "expo-router";
@@ -29,11 +30,11 @@ export default function Login() {
     setEnCours(true);
     setErreur(null);
     try {
-      await login({
+      const { user } = await login({
         telephone: `+225${phone.trim().replace(/\s+/g, "")}`,
         motDePass,
       });
-      router.replace("/(client)/accueil");
+      router.replace(user.role === UserRole.PRESTATAIRE ? "/(prestataire)/accueil" : "/(client)/accueil");
     } catch (e) {
       const message = isAxiosError(e) ? e.response?.data?.message : undefined;
       setErreur(typeof message === "string" ? message : "Connexion impossible. Vérifiez vos identifiants.");

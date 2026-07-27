@@ -1,45 +1,17 @@
-import PaymentMethodOption from "@/components/paymentMethodOption";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
-import { useAsync } from "@/hooks/useAsync";
-import { initierPaiement } from "@/services/paiementService";
-import { getPrestationByDemande } from "@/services/prestationService";
-import { TypePaiement } from "@/types/wallet";
 import { formatFcfa } from "@/utils/format";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, ShieldCheck } from "lucide-react-native";
-import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { ChevronLeft, Clock, ShieldCheck } from "lucide-react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const METHODES: TypePaiement[] = ["orange_money", "mtn_money", "wave", "carte"];
+const PAIEMENT_DEMO = {
+  montant: 25000,
+  prestataireNom: "Jean-Baptiste Kouassi",
+};
 
 export default function Paiement() {
-  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { loading, data: prestation } = useAsync(() => getPrestationByDemande(id), [id]);
-  const [methode, setMethode] = useState<TypePaiement>("orange_money");
-  const [envoi, setEnvoi] = useState(false);
-
-  const payer = async () => {
-    if (!prestation || envoi) return;
-    setEnvoi(true);
-    try {
-      await initierPaiement({ prestationId: prestation.id, methode, montant: prestation.montant });
-      router.replace(`/(client)/demande/${id}/suivi`);
-    } finally {
-      setEnvoi(false);
-    }
-  };
-
-  if (loading && !prestation) {
-    return (
-      <SafeAreaView style={[styles.container, styles.center]}>
-        <ActivityIndicator color={Colors.brand.orange} />
-      </SafeAreaView>
-    );
-  }
-
-  if (!prestation) return null;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -47,37 +19,37 @@ export default function Paiement() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <ChevronLeft size={20} color={Colors.brand.encre} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Paiement sécurisé</Text>
+        <Text style={styles.headerTitle}>Paiement</Text>
       </View>
 
       <View style={styles.body}>
         <View style={styles.escrowBanner}>
           <ShieldCheck size={19} color={Colors.brand.vert} />
           <Text style={styles.escrowText}>
-            Votre paiement est sécurisé et ne sera versé au prestataire qu&apos;après validation du code de
-            confirmation.
+            Votre paiement est sécurisé et ne sera versé au prestataire qu&apos;après qu&apos;il ait validé la fin de
+            la prestation avec le code de confirmation.
           </Text>
         </View>
 
         <View style={styles.amountCard}>
           <Text style={styles.amountLabel}>Montant à régler</Text>
-          <Text style={styles.amount}>{formatFcfa(prestation.montant)}</Text>
-          <Text style={styles.amountFor}>Pour la prestation de {prestation.prestataire.nom}</Text>
+          <Text style={styles.amount}>{formatFcfa(PAIEMENT_DEMO.montant)}</Text>
+          <Text style={styles.amountFor}>Pour la prestation de {PAIEMENT_DEMO.prestataireNom}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Choisissez un moyen de paiement</Text>
-        {METHODES.map((m) => (
-          <PaymentMethodOption key={m} methode={m} selected={methode === m} onPress={() => setMethode(m)} />
-        ))}
-      </View>
+        <View style={styles.statutCard}>
+          <View style={styles.statutIconWrap}>
+            <Clock size={22} color={Colors.brand.orange} />
+          </View>
+          <Text style={styles.statutTitle}>Paiement en cours de traitement</Text>
+          <Text style={styles.statutText}>
+            Le paiement sera automatiquement transmis au prestataire dès qu&apos;il confirmera la fin de la
+            prestation.
+          </Text>
+        </View>
 
-      <TouchableOpacity style={styles.payButton} onPress={payer} disabled={envoi}>
-        {envoi ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.payButtonText}>Payer {formatFcfa(prestation.montant)}</Text>
-        )}
-      </TouchableOpacity>
+        <Text style={styles.noteWallet}>Le paiement Mobile Money sera bientôt disponible.</Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -86,10 +58,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.brand.fond,
-  },
-  center: {
-    alignItems: "center",
-    justifyContent: "center",
   },
   header: {
     flexDirection: "row",
@@ -136,7 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Radii.md,
     paddingVertical: Spacing.four,
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.three,
   },
   amountLabel: {
     fontFamily: Fonts.body,
@@ -154,23 +122,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.textSecondary,
   },
-  sectionTitle: {
+  statutCard: {
+    alignItems: "center",
+    backgroundColor: Colors.brand.tintOr,
+    borderRadius: Radii.md,
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.three,
+    marginBottom: Spacing.three,
+  },
+  statutIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.two,
+  },
+  statutTitle: {
     fontFamily: Fonts.titleSemiBold,
     fontSize: 15,
     color: Colors.brand.encre,
-    marginBottom: Spacing.two,
+    marginBottom: 4,
   },
-  payButton: {
-    marginHorizontal: Spacing.four,
-    marginBottom: Spacing.four,
-    backgroundColor: Colors.brand.orange,
-    borderRadius: Radii.lg,
-    paddingVertical: Spacing.three,
-    alignItems: "center",
+  statutText: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.brand.encre,
+    textAlign: "center",
+    lineHeight: 18,
   },
-  payButtonText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 15,
-    color: "#FFFFFF",
+  noteWallet: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    textAlign: "center",
   },
 });

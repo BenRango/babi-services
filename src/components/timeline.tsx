@@ -3,20 +3,29 @@ import { EtapePrestation, StatutPrestation } from "@/types/prestation";
 import { Check } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const ETAPES: { statut: StatutPrestation; titre: string; description: string }[] = [
+const ETAPES_CLIENT: { statut: StatutPrestation; titre: string; description: string }[] = [
   { statut: "confirmee", titre: "Confirmée", description: "Le prestataire a accepté votre demande." },
   { statut: "en_route", titre: "En route", description: "Le prestataire se dirige vers vous." },
   { statut: "en_cours", titre: "Intervention en cours", description: "Le prestataire travaille sur place." },
   { statut: "terminee", titre: "Terminée", description: "Donnez le code au prestataire pour clôturer." },
 ];
 
+const ETAPES_PRESTATAIRE: { statut: StatutPrestation; titre: string; description: string }[] = [
+  { statut: "confirmee", titre: "Confirmée", description: "Vous avez accepté cette demande." },
+  { statut: "en_route", titre: "En route", description: "Vous êtes en route vers le client." },
+  { statut: "en_cours", titre: "Intervention en cours", description: "Vous intervenez chez le client." },
+  { statut: "terminee", titre: "Terminée", description: "Demandez le code au client pour clôturer." },
+];
+
 interface TimelineProps {
   historique: EtapePrestation[];
   statutActuel: StatutPrestation;
   onAvancer?: () => void;
+  perspective?: "client" | "prestataire";
 }
 
-export default function Timeline({ historique, statutActuel, onAvancer }: TimelineProps) {
+export default function Timeline({ historique, statutActuel, onAvancer, perspective = "client" }: TimelineProps) {
+  const ETAPES = perspective === "prestataire" ? ETAPES_PRESTATAIRE : ETAPES_CLIENT;
   const indexActuel = ETAPES.findIndex((e) => e.statut === statutActuel);
 
   return (

@@ -1,3 +1,4 @@
+import type { DemandeMode, DemandeStatut, TypeDescription } from "@/types/demande";
 import { BadgeArtisan, StatutKyc } from "@/types/user";
 
 export enum OffreStatut {
@@ -18,6 +19,38 @@ export interface OffrePrestataire {
 export interface Offre {
   id: string;
   prestataire?: OffrePrestataire;
+  prixProposeFcfa: number;
+  delaiMinutes: number;
+  message: string;
+  statut: OffreStatut;
+  createdAt: string;
+}
+
+export interface CreerOffrePayload {
+  demandeId: string;
+  prixProposeFcfa: number;
+  delaiMinutes: number;
+  message?: string;
+}
+
+export interface MesOffreDemande {
+  id: string;
+  client: { id: string; nom: string; telephone: string };
+  categorie: string;
+  picture_url?: string | null;
+  typeDescription: TypeDescription;
+  description?: string;
+  budgetMaxFcfa: number;
+  commune?: string | null;
+  mode: DemandeMode;
+  statut: DemandeStatut;
+  createdAt: string;
+}
+
+export interface MesOffre {
+  id: string;
+  demandeId: string;
+  demande: MesOffreDemande;
   prixProposeFcfa: number;
   delaiMinutes: number;
   message: string;

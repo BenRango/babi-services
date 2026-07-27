@@ -1,16 +1,22 @@
+import DemandeDescription from "@/components/demandeDescription";
 import OffreCard from "@/components/offreCard";
 import { categorieIcon, categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { accepterOffre, refuserOffre } from "@api/offres";
 import { getMesDemandes } from "@api/demandes";
-import { apercuDescription, formatDateRelative, formatFcfa } from "@/utils/format";
+import { DemandeMode } from "@/types/demande";
+import { formatDateRelative, formatFcfa } from "@/utils/format";
 import { Image } from "expo-image";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft, MapPin } from "lucide-react-native";
 import { useCallback } from "react";
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+function modeLabel(mode: DemandeMode): string {
+  return mode === DemandeMode.RECHERCHE ? "Recherche libre" : "Annonce publique";
+}
 
 export default function OffresDemande() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -80,7 +86,10 @@ export default function OffresDemande() {
                   </View>
                   <Text style={styles.publieeText}>publiée {formatDateRelative(demande.createdAt).toLowerCase()}</Text>
                 </View>
-                <Text style={styles.description}>{apercuDescription(demande)}</Text>
+                <DemandeDescription demande={demande} textStyle={styles.description} />
+                {demande.picture_url && (
+                  <Image source={{ uri: demande.picture_url }} style={styles.photo} contentFit="cover" />
+                )}
                 <View style={styles.chipsRow}>
                   <View style={styles.budgetChip}>
                     <Text style={styles.budgetText}>Budget max {formatFcfa(demande.budgetMaxFcfa)}</Text>
@@ -91,6 +100,9 @@ export default function OffresDemande() {
                       <Text style={styles.communeText}>{demande.commune}</Text>
                     </View>
                   )}
+                  <View style={styles.modeChip}>
+                    <Text style={styles.modeText}>{modeLabel(demande.mode)}</Text>
+                  </View>
                 </View>
               </View>
 
@@ -195,6 +207,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.two,
   },
+  photo: {
+    width: "100%",
+    height: 160,
+    borderRadius: Radii.sm,
+    marginBottom: Spacing.two,
+    backgroundColor: Colors.light.backgroundSelected,
+  },
   chipsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -224,6 +243,17 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: 11,
     color: "#B91C1C",
+  },
+  modeChip: {
+    backgroundColor: Colors.light.backgroundSelected,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  modeText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    color: Colors.light.textSecondary,
   },
   offresHeaderRow: {
     flexDirection: "row",

@@ -1,3 +1,4 @@
+import { CreerOffrePayload, MesOffre } from "@/types/offre";
 import { apiClient } from "./client";
 
 /**
@@ -17,4 +18,25 @@ export async function accepterOffre(offreId: string): Promise<PrestationAcceptee
 
 export async function refuserOffre(offreId: string): Promise<void> {
   await apiClient.patch(`/offres/${offreId}/refuser`);
+}
+
+export interface OffreCreee {
+  id: string;
+  demandeId: string;
+  prestataireId: string;
+  prixProposeFcfa: number;
+  delaiMinutes: number;
+  message: string;
+  statut: string;
+  createdAt: string;
+}
+
+export async function creerOffre(payload: CreerOffrePayload): Promise<OffreCreee> {
+  const { data } = await apiClient.post<OffreCreee>("/offres", payload);
+  return data;
+}
+
+export async function getMesOffres(): Promise<MesOffre[]> {
+  const { data } = await apiClient.get<MesOffre[]>("/offres/mes-offres");
+  return data;
 }

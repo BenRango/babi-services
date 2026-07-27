@@ -39,13 +39,13 @@ export default function Register() {
     setEnCours(true);
     setErreur(null);
     try {
-      await register({
+      const { user } = await register({
         nom: nom.trim(),
         telephone: `+225${phone.trim().replace(/\s+/g, "")}`,
         motDePass,
         role,
       });
-      router.replace("/(client)/accueil");
+      router.replace(user.role === UserRole.PRESTATAIRE ? "/(prestataire)/accueil" : "/(client)/accueil");
     } catch (e) {
       const message = isAxiosError(e) ? e.response?.data?.message : undefined;
       setErreur(typeof message === "string" ? message : "Inscription impossible. Réessayez.");

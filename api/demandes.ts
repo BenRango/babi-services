@@ -11,6 +11,16 @@ export async function getDemandeById(id: string): Promise<Demande> {
   return data;
 }
 
+export interface FiltresDemandesOuvertes {
+  categorie?: string;
+  commune?: string;
+}
+
+export async function getDemandesOuvertes(filtres?: FiltresDemandesOuvertes): Promise<Demande[]> {
+  const { data } = await apiClient.get<Demande[]>("/demandes", { params: filtres });
+  return data;
+}
+
 export interface CreateDemandePayload {
   categorie: string;
   budgetMaxFcfa: number;
