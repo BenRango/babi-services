@@ -32,6 +32,9 @@ export async function clearUser(): Promise<void> {
 
 export const apiClient = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
+  // Sans ça, une requête (surtout un upload multipart sur réseau mobile) peut
+  // rester bloquée indéfiniment sans jamais résoudre ni rejeter la promesse.
+  timeout: 30000,
 });
 
 apiClient.interceptors.request.use(async (config) => {

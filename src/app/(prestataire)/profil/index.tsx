@@ -1,7 +1,7 @@
 import BadgeArtisanChip from "@/components/badgeArtisanChip";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { BadgeArtisan, StatutKyc } from "@/types/user";
+import { StatutKyc } from "@/types/user";
 import { logout } from "@api/auth";
 import { getMe } from "@api/users";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -9,8 +9,6 @@ import { ChevronRight, LogOut, MapPin, User as UserIcon } from "lucide-react-nat
 import { useCallback } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BADGE_MOCK = BadgeArtisan.ARGENT;
 
 function kycMeta(statut?: StatutKyc): { label: string; color: string; background: string } {
   if (statut === "verifie") return { label: "Vérifié", color: Colors.brand.vert, background: Colors.brand.tintVert };
@@ -59,7 +57,7 @@ export default function ProfilPrestataire() {
                 <View style={[styles.kycBadge, { backgroundColor: kyc.background }]}>
                   <Text style={[styles.kycText, { color: kyc.color }]}>{kyc.label}</Text>
                 </View>
-                <BadgeArtisanChip badge={BADGE_MOCK} />
+                {user?.badge && <BadgeArtisanChip badge={user.badge} />}
               </View>
             </>
           )}

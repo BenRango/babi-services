@@ -2,11 +2,13 @@ import { categorieIcon, categorieLabel, CATEGORIES } from "@/constants/categorie
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { usePolling } from "@/hooks/usePolling";
+import { Demande } from "@/types/demande";
 import { apercuDescription, formatDateRelative, formatFcfa } from "@/utils/format";
 import { getDemandesOuvertes } from "@api/demandes";
+import { getStoredUser } from "@api/client";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import { MapPin, Sparkles } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,20 +20,30 @@ export default function DemandesOuvertes() {
   const [filtreCategorie, setFiltreCategorie] = useState("toutes");
   const [filtreCommune, setFiltreCommune] = useState("toutes");
   const { loading, data: demandes, reload } = useAsync(getDemandesOuvertes);
+  const { data: user } = useAsync(getStoredUser);
 
   usePolling(reload, POLLING_MS);
 
   const toutesLesDemandes = demandes ?? [];
 
+  // communes/categories du profil sont normalisées en minuscule côté backend,
+  // pas garanti pour demande.commune (saisi librement à la création) — on
+  // normalise des deux côtés pour éviter un faux négatif sur la casse.
+  const correspondAuProfil = (demande: Demande) =>
+    !!user?.categories?.includes(demande.categorie.toLowerCase()) ||
+    (!!demande.commune && !!user?.communes?.includes(demande.commune.toLowerCase()));
+
   const communesDisponibles = Array.from(
     new Set(toutesLesDemandes.map((d) => d.commune).filter((c): c is string => !!c))
   );
 
-  const demandesFiltrees = toutesLesDemandes.filter(
-    (d) =>
-      (filtreCategorie === "toutes" || d.categorie === filtreCategorie) &&
-      (filtreCommune === "toutes" || d.commune === filtreCommune)
-  );
+  const demandesFiltrees = toutesLesDemandes
+    .filter(
+      (d) =>
+        (filtreCategorie === "toutes" || d.categorie === filtreCategorie) &&
+        (filtreCommune === "toutes" || d.commune === filtreCommune)
+    )
+    .sort((a, b) => Number(correspondAuProfil(b)) - Number(correspondAuProfil(a)));
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -87,6 +99,12 @@ export default function DemandesOuvertes() {
                 </View>
                 <Text style={styles.budget}>{formatFcfa(demande.budgetMaxFcfa)}</Text>
               </View>
+              {correspondAuProfil(demande) && (
+                <View style={styles.recommandeRow}>
+                  <Sparkles size={11} color={Colors.brand.vert} />
+                  <Text style={styles.recommandeText}>Correspond à votre profil</Text>
+                </View>
+              )}
               <Text style={styles.description} numberOfLines={2}>
                 {apercuDescription(demande)}
               </Text>
@@ -221,6 +239,17 @@ const styles = StyleSheet.create({
     color: Colors.brand.encre,
     lineHeight: 18,
     marginBottom: Spacing.two,
+  },
+  recommandeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: Spacing.two,
+  },
+  recommandeText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    color: Colors.brand.vert,
   },
   communeRow: {
     flexDirection: "row",

@@ -6,6 +6,12 @@ export interface RegisterPayload {
   telephone: string;
   motDePass: string;
   role: UserRole;
+  /** Client uniquement, optionnel. */
+  commune?: string;
+  /** Prestataire uniquement, optionnel, max 3. */
+  communes?: string[];
+  /** Prestataire uniquement, obligatoire (1 à 3) si role = prestataire. */
+  categories?: string[];
 }
 
 export interface LoginPayload {

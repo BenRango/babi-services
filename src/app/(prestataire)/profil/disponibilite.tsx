@@ -1,34 +1,64 @@
+import { COMMUNES_ABIDJAN } from "@/constants/communes";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
-import { COMMUNES_ABIDJAN, disponibilitePrestataire } from "@/services/_mockPrestataireData";
+import { useAsync } from "@/hooks/useAsync";
+import { getMe, updateProfile } from "@api/users";
 import { useRouter } from "expo-router";
 import { Check, ChevronLeft } from "lucide-react-native";
-import { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const MAX_COMMUNES = 3;
 
 export default function Disponibilite() {
   const router = useRouter();
-  const [disponible, setDisponible] = useState(disponibilitePrestataire.disponible);
-  const [communes, setCommunes] = useState<string[]>(disponibilitePrestataire.communes);
+  const { loading, data: user } = useAsync(getMe);
 
-  const basculerDisponible = (valeur: boolean) => {
-    setDisponible(valeur);
-    disponibilitePrestataire.disponible = valeur;
+  // Pas encore de champ "disponible" côté backend — reste local pour l'instant.
+  const [disponible, setDisponible] = useState(true);
+  const [communes, setCommunes] = useState<string[]>([]);
+  const [initialise, setInitialise] = useState(false);
+  const [enregistrement, setEnregistrement] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [succes, setSucces] = useState(false);
+
+  useEffect(() => {
+    if (user && !initialise) {
+      setCommunes(user.communes ?? []);
+      setInitialise(true);
+    }
+  }, [user, initialise]);
+
+  const basculerCommune = (id: string) => {
+    setSucces(false);
+    setCommunes((prev) => {
+      if (prev.includes(id)) return prev.filter((c) => c !== id);
+      if (prev.length >= MAX_COMMUNES) return prev;
+      return [...prev, id];
+    });
   };
 
-  const basculerCommune = (commune: string) => {
-    const dejaChoisie = communes.includes(commune);
-    let nouvelles: string[];
-    if (dejaChoisie) {
-      nouvelles = communes.filter((c) => c !== commune);
-    } else {
-      if (communes.length >= MAX_COMMUNES) return;
-      nouvelles = [...communes, commune];
+  const enregistrer = async () => {
+    if (enregistrement) return;
+    setEnregistrement(true);
+    setErreur(null);
+    setSucces(false);
+    try {
+      await updateProfile({ communes });
+      setSucces(true);
+    } catch {
+      setErreur("Impossible d'enregistrer vos communes pour l'instant.");
+    } finally {
+      setEnregistrement(false);
     }
-    setCommunes(nouvelles);
-    disponibilitePrestataire.communes = nouvelles;
   };
 
   return (
@@ -40,45 +70,71 @@ export default function Disponibilite() {
         <Text style={styles.headerTitle}>Disponibilité</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.dispoCard}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dispoTitle}>{disponible ? "Vous êtes disponible" : "Vous êtes indisponible"}</Text>
-            <Text style={styles.dispoSubtitle}>
-              {disponible ? "Vous recevez de nouvelles demandes." : "Vous ne recevez plus de nouvelles demandes."}
-            </Text>
+      {loading && !user ? (
+        <View style={styles.center}>
+          <ActivityIndicator color={Colors.brand.orange} />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.dispoCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.dispoTitle}>{disponible ? "Vous êtes disponible" : "Vous êtes indisponible"}</Text>
+              <Text style={styles.dispoSubtitle}>
+                {disponible ? "Vous recevez de nouvelles demandes." : "Vous ne recevez plus de nouvelles demandes."}
+              </Text>
+            </View>
+            <Switch
+              value={disponible}
+              onValueChange={setDisponible}
+              trackColor={{ false: Colors.light.backgroundSelected, true: Colors.brand.orange }}
+              thumbColor="#FFFFFF"
+            />
           </View>
-          <Switch
-            value={disponible}
-            onValueChange={basculerDisponible}
-            trackColor={{ false: Colors.light.backgroundSelected, true: Colors.brand.orange }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
 
-        <Text style={styles.sectionTitle}>Vos communes d&apos;intervention</Text>
-        <Text style={styles.sectionSubtitle}>
-          Choisissez jusqu&apos;à {MAX_COMMUNES} communes où vous pouvez intervenir ({communes.length}/{MAX_COMMUNES}).
-        </Text>
+          <Text style={styles.sectionTitle}>Vos communes d&apos;intervention</Text>
+          <Text style={styles.sectionSubtitle}>
+            Choisissez jusqu&apos;à {MAX_COMMUNES} communes où vous pouvez intervenir ({communes.length}/
+            {MAX_COMMUNES}).
+          </Text>
 
-        <View style={styles.communesGrid}>
-          {COMMUNES_ABIDJAN.map((commune) => {
-            const choisie = communes.includes(commune);
-            const desactivee = !choisie && communes.length >= MAX_COMMUNES;
-            return (
-              <TouchableOpacity
-                key={commune}
-                style={[styles.communeChip, choisie && styles.communeChipActive, desactivee && styles.communeChipDisabled]}
-                onPress={() => basculerCommune(commune)}
-                disabled={desactivee}
-              >
-                {choisie && <Check size={13} color="#FFFFFF" style={{ marginRight: 4 }} />}
-                <Text style={[styles.communeText, choisie && styles.communeTextActive]}>{commune}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
+          <View style={styles.communesGrid}>
+            {COMMUNES_ABIDJAN.map((commune) => {
+              const choisie = communes.includes(commune.id);
+              const desactivee = !choisie && communes.length >= MAX_COMMUNES;
+              return (
+                <TouchableOpacity
+                  key={commune.id}
+                  style={[
+                    styles.communeChip,
+                    choisie && styles.communeChipActive,
+                    desactivee && styles.communeChipDisabled,
+                  ]}
+                  onPress={() => basculerCommune(commune.id)}
+                  disabled={desactivee}
+                >
+                  {choisie && <Check size={13} color="#FFFFFF" style={{ marginRight: 4 }} />}
+                  <Text style={[styles.communeText, choisie && styles.communeTextActive]}>{commune.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {erreur && <Text style={styles.erreur}>{erreur}</Text>}
+          {succes && <Text style={styles.succes}>Communes enregistrées.</Text>}
+
+          <TouchableOpacity
+            style={[styles.submitButton, enregistrement && styles.submitButtonDisabled]}
+            onPress={enregistrer}
+            disabled={enregistrement}
+          >
+            {enregistrement ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitText}>Enregistrer</Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -87,6 +143,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.brand.fond,
+  },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   header: {
     flexDirection: "row",
@@ -171,6 +232,33 @@ const styles = StyleSheet.create({
     color: Colors.brand.encre,
   },
   communeTextActive: {
+    color: "#FFFFFF",
+  },
+  erreur: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: "#DC2626",
+    marginTop: Spacing.three,
+  },
+  succes: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: Colors.brand.vert,
+    marginTop: Spacing.three,
+  },
+  submitButton: {
+    backgroundColor: Colors.brand.orange,
+    borderRadius: Radii.lg,
+    paddingVertical: Spacing.three,
+    alignItems: "center",
+    marginTop: Spacing.four,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
+  submitText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 15,
     color: "#FFFFFF",
   },
 });

@@ -1,7 +1,7 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Image } from "expo-image";
 import { Tabs } from "expo-router";
-import { Home, User, Wallet } from "lucide-react-native";
+import { Home, Plus, User, Wallet } from "lucide-react-native";
+import { View } from "react-native";
 
 export default function ClientLayout() {
   return (
@@ -31,23 +31,33 @@ export default function ClientLayout() {
         }}
       />
       <Tabs.Screen
-        name="demande"
-        options={{
-          title: "Demandes",
-          tabBarIcon: ({ color, size }) => (
-            <Image
-              style={{ width: size, height: size, tintColor: color }}
-              source={require("@/assets/icons/request-send.png")}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="message"
         options={{
           title: "Message",
           tabBarIcon: ({ color, size }) => (
             <AntDesign color={color} size={size} name="message" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="demande"
+        options={{
+          title: "Demandes",
+          tabBarLabel: () => null,
+          tabBarIcon: ({ size }) => (
+            <View
+              style={{
+                width: size + 26,
+                height: size + 26,
+                borderRadius: (size + 26) / 2,
+                backgroundColor: "#F97316",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 4,
+              }}
+            >
+              <Plus color="#FFFFFF" size={size} />
+            </View>
           ),
         }}
       />

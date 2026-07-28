@@ -1,25 +1,22 @@
 import ConfirmationCodeDisplay from "@/components/confirmationCodeDisplay";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
+import { usePolling } from "@/hooks/usePolling";
 import { getMesPrestations } from "@api/prestations";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft } from "lucide-react-native";
-import { useCallback } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const POLLING_MS = 7000;
 
 export default function CodeConfirmation() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { loading, data: prestations, reload } = useAsync(getMesPrestations);
 
-  useFocusEffect(
-    useCallback(() => {
-      reload();
-    }, [reload])
-  );
-
   const prestation = prestations?.find((p) => p.offre.demande.id === id);
+  usePolling(reload, POLLING_MS, prestation?.statut !== "terminee");
 
   if (loading && !prestation) {
     return (

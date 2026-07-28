@@ -2,7 +2,6 @@ import { categorieIcon, categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { usePolling } from "@/hooks/usePolling";
-import { disponibilitePrestataire } from "@/services/_mockPrestataireData";
 import { apercuDescription } from "@/utils/format";
 import { getDemandesOuvertes } from "@api/demandes";
 import { getStoredUser } from "@api/client";
@@ -19,15 +18,11 @@ export default function AccueilPrestataire() {
   const router = useRouter();
   const { data: user } = useAsync(getStoredUser);
   const { data: demandes, reload } = useAsync(getDemandesOuvertes);
-  const [disponible, setDisponible] = useState(disponibilitePrestataire.disponible);
+  // Pas encore de champ "disponible" côté backend — reste local pour l'instant.
+  const [disponible, setDisponible] = useState(true);
   const prenom = user?.nom?.split(" ")[0];
 
   usePolling(reload, POLLING_MS);
-
-  const toggleDisponible = (valeur: boolean) => {
-    setDisponible(valeur);
-    disponibilitePrestataire.disponible = valeur;
-  };
 
   const toutesLesDemandes = demandes ?? [];
   const demandesProches = toutesLesDemandes.slice(0, 3);
@@ -39,7 +34,7 @@ export default function AccueilPrestataire() {
           <View>
             <View style={styles.locationRow}>
               <MapPin size={12} color={Colors.brand.orange} />
-              <Text style={styles.location}>{disponibilitePrestataire.communes.join(", ") || "Abidjan"}</Text>
+              <Text style={styles.location}>{user?.communes?.join(", ") || "Abidjan"}</Text>
             </View>
             <Text style={styles.greeting}>Bonjour{prenom ? ` ${prenom}` : ""} 👋</Text>
           </View>
@@ -59,7 +54,7 @@ export default function AccueilPrestataire() {
           </View>
           <Switch
             value={disponible}
-            onValueChange={toggleDisponible}
+            onValueChange={setDisponible}
             trackColor={{ false: Colors.light.backgroundSelected, true: Colors.brand.orange }}
             thumbColor="#FFFFFF"
           />

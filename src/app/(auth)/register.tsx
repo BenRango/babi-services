@@ -1,4 +1,5 @@
-import logo from "@/assets/images/logo/BabiService_logo.png";
+import { CATEGORIES } from "@/constants/categories";
+import { COMMUNES_ABIDJAN } from "@/constants/communes";
 import { UserRole } from "@/types/user";
 import { register } from "@api/auth";
 import { isAxiosError } from "axios";
@@ -9,6 +10,7 @@ import {
   ActivityIndicator,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,10 +18,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const logo = require("@/assets/images/logo/BabiService_logo.png");
+
 const ROLES = [
   { id: UserRole.CLIENT, label: "Client" },
   { id: UserRole.PRESTATAIRE, label: "Prestataire" },
 ];
+
+const MAX_COMMUNES = 3;
+const MAX_CATEGORIES = 3;
 
 export default function Register() {
   const { role: roleInitial } = useLocalSearchParams<{ role?: UserRole }>();
@@ -29,10 +36,33 @@ export default function Register() {
   const [phone, setPhone] = useState("");
   const [motDePass, setMotDePass] = useState("");
   const [role, setRole] = useState<UserRole>(roleInitial ?? UserRole.CLIENT);
+  const [communeClient, setCommuneClient] = useState<string | null>(null);
+  const [communesPresta, setCommunesPresta] = useState<string[]>([]);
+  const [categoriesPresta, setCategoriesPresta] = useState<string[]>([]);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
-  const formValide = nom.trim().length > 0 && phone.trim().length > 0 && motDePass.length > 0;
+  const toggleCommunePresta = (id: string) => {
+    setCommunesPresta((prev) => {
+      if (prev.includes(id)) return prev.filter((c) => c !== id);
+      if (prev.length >= MAX_COMMUNES) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const toggleCategoriePresta = (id: string) => {
+    setCategoriesPresta((prev) => {
+      if (prev.includes(id)) return prev.filter((c) => c !== id);
+      if (prev.length >= MAX_CATEGORIES) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const formValide =
+    nom.trim().length > 0 &&
+    phone.trim().length > 0 &&
+    motDePass.length > 0 &&
+    (role !== UserRole.PRESTATAIRE || categoriesPresta.length > 0);
 
   const creerCompte = async () => {
     if (!formValide || enCours) return;
@@ -44,6 +74,13 @@ export default function Register() {
         telephone: `+225${phone.trim().replace(/\s+/g, "")}`,
         motDePass,
         role,
+        ...(role === UserRole.CLIENT && communeClient ? { commune: communeClient } : {}),
+        ...(role === UserRole.PRESTATAIRE
+          ? {
+              categories: categoriesPresta,
+              ...(communesPresta.length > 0 ? { communes: communesPresta } : {}),
+            }
+          : {}),
       });
       router.replace(user.role === UserRole.PRESTATAIRE ? "/(prestataire)/accueil" : "/(client)/accueil");
     } catch (e) {
@@ -60,81 +97,148 @@ export default function Register() {
         <ChevronLeft size={22} color="#1A1A1A" />
       </Pressable>
 
-      <Image source={logo} style={styles.logo} resizeMode="contain" />
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <Image source={logo} style={styles.logo} resizeMode="contain" />
 
-      <Text style={styles.title}>Créer un compte</Text>
-      <Text style={styles.subtitle}>Renseignez vos informations pour commencer.</Text>
+        <Text style={styles.title}>Créer un compte</Text>
+        <Text style={styles.subtitle}>Renseignez vos informations pour commencer.</Text>
 
-      <View style={styles.roleRow}>
-        {ROLES.map((r) => {
-          const isSelected = role === r.id;
-          return (
-            <Pressable
-              key={r.id}
-              style={[styles.roleChip, isSelected && styles.roleChipSelected]}
-              onPress={() => setRole(r.id)}
-            >
-              <Text style={[styles.roleChipText, isSelected && styles.roleChipTextSelected]}>{r.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nom complet"
-        placeholderTextColor="#A0A0A0"
-        value={nom}
-        onChangeText={setNom}
-      />
-
-      <View style={styles.inputRow}>
-        <View style={styles.countryCode}>
-          <Text style={styles.countryCodeText}>CI +225</Text>
+        <View style={styles.roleRow}>
+          {ROLES.map((r) => {
+            const isSelected = role === r.id;
+            return (
+              <Pressable
+                key={r.id}
+                style={[styles.roleChip, isSelected && styles.roleChipSelected]}
+                onPress={() => setRole(r.id)}
+              >
+                <Text style={[styles.roleChipText, isSelected && styles.roleChipTextSelected]}>{r.label}</Text>
+              </Pressable>
+            );
+          })}
         </View>
+
         <TextInput
-          style={styles.phoneInput}
-          placeholder="07 00 00 00 00"
+          style={styles.input}
+          placeholder="Nom complet"
           placeholderTextColor="#A0A0A0"
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
+          value={nom}
+          onChangeText={setNom}
         />
-      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Mot de passe"
-        placeholderTextColor="#A0A0A0"
-        secureTextEntry
-        value={motDePass}
-        onChangeText={setMotDePass}
-      />
+        <View style={styles.inputRow}>
+          <View style={styles.countryCode}>
+            <Text style={styles.countryCodeText}>CI +225</Text>
+          </View>
+          <TextInput
+            style={styles.phoneInput}
+            placeholder="07 00 00 00 00"
+            placeholderTextColor="#A0A0A0"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
+        </View>
 
-      {erreur && <Text style={styles.erreur}>{erreur}</Text>}
+        <TextInput
+          style={styles.input}
+          placeholder="Mot de passe"
+          placeholderTextColor="#A0A0A0"
+          secureTextEntry
+          value={motDePass}
+          onChangeText={setMotDePass}
+        />
 
-      <Text style={styles.terms}>
-        En continuant, vous acceptez nos Conditions d'utilisation et notre
-        Politique de confidentialité.
-      </Text>
-
-      <Pressable
-        style={[styles.submitButton, (!formValide || enCours) && styles.submitButtonDisabled]}
-        onPress={creerCompte}
-        disabled={!formValide || enCours}
-      >
-        {enCours ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.submitButtonText}>Créer mon compte</Text>
+        {role === UserRole.CLIENT && (
+          <>
+            <Text style={styles.sectionLabel}>Votre commune (optionnel)</Text>
+            <View style={styles.chipsWrap}>
+              {COMMUNES_ABIDJAN.map((commune) => {
+                const selected = communeClient === commune.id;
+                return (
+                  <Pressable
+                    key={commune.id}
+                    style={[styles.chip, selected && styles.chipSelected]}
+                    onPress={() => setCommuneClient(selected ? null : commune.id)}
+                  >
+                    <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{commune.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </>
         )}
-      </Pressable>
 
-      <Pressable style={styles.loginLinkWrap} onPress={() => router.push("/login")}>
-        <Text style={styles.loginText}>
-          Déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
+        {role === UserRole.PRESTATAIRE && (
+          <>
+            <Text style={styles.sectionLabel}>
+              Vos catégories de service* ({categoriesPresta.length}/{MAX_CATEGORIES})
+            </Text>
+            <Text style={styles.sectionHint}>Au moins une, jusqu&apos;à {MAX_CATEGORIES}.</Text>
+            <View style={styles.chipsWrap}>
+              {CATEGORIES.map((cat) => {
+                const selected = categoriesPresta.includes(cat.id);
+                const desactive = !selected && categoriesPresta.length >= MAX_CATEGORIES;
+                return (
+                  <Pressable
+                    key={cat.id}
+                    style={[styles.chip, selected && styles.chipSelected, desactive && styles.chipDisabled]}
+                    onPress={() => toggleCategoriePresta(cat.id)}
+                    disabled={desactive}
+                  >
+                    <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{cat.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text style={styles.sectionLabel}>
+              Vos communes d&apos;intervention (optionnel, {communesPresta.length}/{MAX_COMMUNES})
+            </Text>
+            <View style={styles.chipsWrap}>
+              {COMMUNES_ABIDJAN.map((commune) => {
+                const selected = communesPresta.includes(commune.id);
+                const desactive = !selected && communesPresta.length >= MAX_COMMUNES;
+                return (
+                  <Pressable
+                    key={commune.id}
+                    style={[styles.chip, selected && styles.chipSelected, desactive && styles.chipDisabled]}
+                    onPress={() => toggleCommunePresta(commune.id)}
+                    disabled={desactive}
+                  >
+                    <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{commune.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </>
+        )}
+
+        {erreur && <Text style={styles.erreur}>{erreur}</Text>}
+
+        <Text style={styles.terms}>
+          En continuant, vous acceptez nos Conditions d'utilisation et notre
+          Politique de confidentialité.
         </Text>
-      </Pressable>
+
+        <Pressable
+          style={[styles.submitButton, (!formValide || enCours) && styles.submitButtonDisabled]}
+          onPress={creerCompte}
+          disabled={!formValide || enCours}
+        >
+          {enCours ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>Créer mon compte</Text>
+          )}
+        </Pressable>
+
+        <Pressable style={styles.loginLinkWrap} onPress={() => router.push("/login")}>
+          <Text style={styles.loginText}>
+            Déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
+          </Text>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -144,6 +248,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FAFAF7",
     paddingHorizontal: 24,
+  },
+  scroll: {
+    paddingBottom: 32,
   },
   backButton: {
     width: 40,
@@ -195,6 +302,47 @@ const styles = StyleSheet.create({
     color: "#8A8A8A",
   },
   roleChipTextSelected: {
+    color: "#C2540A",
+  },
+  sectionLabel: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 13,
+    color: "#1A1A1A",
+    marginTop: 20,
+    marginBottom: 4,
+  },
+  sectionHint: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 12,
+    color: "#A0A0A0",
+    marginBottom: 8,
+  },
+  chipsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "#F0F0EE",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  chipSelected: {
+    backgroundColor: "#FBE7D9",
+    borderColor: "#F97316",
+  },
+  chipDisabled: {
+    opacity: 0.4,
+  },
+  chipText: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 13,
+    color: "#1A1A1A",
+  },
+  chipTextSelected: {
     color: "#C2540A",
   },
   input: {

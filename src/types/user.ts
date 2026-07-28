@@ -27,4 +27,11 @@ export interface User {
   telephone: string;
   role: UserRole;
   statutKyc: StatutKyc;
+  badge: BadgeArtisan;
+  /** Réservé aux clients — null pour un prestataire. */
+  commune: string | null;
+  /** Réservé aux prestataires — null pour un client. */
+  communes: string[] | null;
+  /** Réservé aux prestataires — null pour un client. */
+  categories: string[] | null;
 }

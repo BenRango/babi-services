@@ -1,22 +1,27 @@
-import { CATEGORIES } from "@/constants/categories";
+import { CATEGORIES, categorieLabel } from "@/constants/categories";
+import { communeLabel } from "@/constants/communes";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { getMesDemandes } from "@api/demandes";
 import { getStoredUser } from "@api/client";
-import { listPrestatairesRecommandes } from "@/services/prestataireService";
+import { rechercherPrestataires } from "@api/prestataires";
 import { DemandeStatut } from "@/types/demande";
 import { apercuDescription, formatFcfa } from "@/utils/format";
+import { couleurAvatar, initiales } from "@/utils/avatar";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Bell, ChevronRight, MapPin, Search, ShieldCheck, Star } from "lucide-react-native";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Bell, ChevronRight, MapPin, Search, ShieldCheck } from "lucide-react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Accueil() {
   const router = useRouter();
-  const { data: prestataires } = useAsync(listPrestatairesRecommandes);
-  const { data: demandes } = useAsync(getMesDemandes);
   const { data: user } = useAsync(getStoredUser);
+  const { data: prestataires } = useAsync(
+    () => rechercherPrestataires(user?.commune ? { commune: user.commune } : undefined),
+    [user?.commune]
+  );
+  const { data: demandes } = useAsync(getMesDemandes);
   const prenom = user?.nom?.split(" ")[0];
 
   const demandeEnCours = demandes?.find(
@@ -35,13 +40,16 @@ export default function Accueil() {
           <View>
             <View style={styles.locationRow}>
               <MapPin size={12} color={Colors.brand.orange} />
-              <Text style={styles.location}>Cocody, Abidjan</Text>
+              <Text style={styles.location}>{user?.commune ? `${communeLabel(user.commune)}, Abidjan` : "Abidjan"}</Text>
             </View>
             <Text style={styles.greeting}>Bonjour{prenom ? ` ${prenom}` : ""} 👋</Text>
           </View>
-          <View style={styles.bellButton}>
+          <TouchableOpacity
+            style={styles.bellButton}
+            onPress={() => Alert.alert("Bientôt disponible", "Les notifications arrivent prochainement.")}
+          >
             <Bell size={19} color={Colors.brand.encre} />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.searchBar}>
@@ -82,18 +90,24 @@ export default function Accueil() {
           <Text style={styles.sectionTitle}>Recommandés près de vous</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.artisansRow}>
-          {(prestataires ?? []).map((p) => (
-            <View key={p.id} style={styles.artisanCard}>
-              <Image source={{ uri: p.avatarUrl }} style={styles.artisanImage} contentFit="cover" />
-              <Text style={styles.artisanNom} numberOfLines={1}>{p.nom}</Text>
-              <Text style={styles.artisanMetier} numberOfLines={1}>{p.metier}</Text>
-              <View style={styles.artisanRatingRow}>
-                <Star size={10} color="#F59E0B" fill="#F59E0B" />
-                <Text style={styles.artisanRating}>{p.note}</Text>
-                <Text style={styles.artisanDistance}>{p.distanceKm} km</Text>
+          {(prestataires ?? []).slice(0, 10).map((p) => (
+            <TouchableOpacity
+              key={p.id}
+              style={styles.artisanCard}
+              onPress={() => router.push(`/(client)/accueil/artisan/${p.id}`)}
+            >
+              <View style={[styles.artisanAvatar, { backgroundColor: couleurAvatar(p.id) }]}>
+                <Text style={styles.artisanAvatarText}>{initiales(p.nom)}</Text>
               </View>
-            </View>
+              <Text style={styles.artisanNom} numberOfLines={1}>{p.nom}</Text>
+              <Text style={styles.artisanMetier} numberOfLines={1}>
+                {p.categories.map(categorieLabel).join(", ")}
+              </Text>
+            </TouchableOpacity>
           ))}
+          {prestataires && prestataires.length === 0 && (
+            <Text style={styles.artisansEmpty}>Aucun prestataire disponible pour l&apos;instant.</Text>
+          )}
         </ScrollView>
 
         <View style={styles.securityBanner}>
@@ -263,12 +277,18 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     padding: Spacing.two,
   },
-  artisanImage: {
+  artisanAvatar: {
     width: "100%",
-    height: 84,
+    height: 72,
     borderRadius: Radii.sm,
-    backgroundColor: Colors.brand.tintOr,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 6,
+  },
+  artisanAvatarText: {
+    fontFamily: Fonts.titleSemiBold,
+    fontSize: 20,
+    color: "#FFFFFF",
   },
   artisanNom: {
     fontFamily: Fonts.titleSemiBold,
@@ -281,21 +301,10 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     marginBottom: 4,
   },
-  artisanRatingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  artisanRating: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    color: Colors.brand.encre,
-  },
-  artisanDistance: {
+  artisansEmpty: {
     fontFamily: Fonts.body,
-    fontSize: 10,
+    fontSize: 12,
     color: Colors.light.textSecondary,
-    marginLeft: "auto",
   },
   securityBanner: {
     flexDirection: "row",

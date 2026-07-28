@@ -1,6 +1,7 @@
+import { CATEGORIES } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { listCategoriesAvecCompte } from "@/services/prestataireService";
+import { rechercherPrestataires } from "@api/prestataires";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Search } from "lucide-react-native";
@@ -10,10 +11,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TousLesServices() {
   const router = useRouter();
-  const { loading, data: categories } = useAsync(listCategoriesAvecCompte);
+  const { loading, data: prestataires } = useAsync(() => rechercherPrestataires());
   const [recherche, setRecherche] = useState("");
 
-  const categoriesFiltrees = (categories ?? []).filter((cat) =>
+  const categories = CATEGORIES.map((cat) => ({
+    ...cat,
+    nbArtisans: (prestataires ?? []).filter((p) => p.categories.includes(cat.id)).length,
+  }));
+
+  const categoriesFiltrees = categories.filter((cat) =>
     cat.label.toLowerCase().includes(recherche.trim().toLowerCase())
   );
 
@@ -37,7 +43,7 @@ export default function TousLesServices() {
         />
       </View>
 
-      {loading && !categories ? (
+      {loading && !prestataires ? (
         <View style={styles.center}>
           <ActivityIndicator color={Colors.brand.orange} />
         </View>

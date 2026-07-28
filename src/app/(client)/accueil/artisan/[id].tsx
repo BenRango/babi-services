@@ -1,19 +1,30 @@
+import BadgeArtisanChip from "@/components/badgeArtisanChip";
 import ContinuerButton from "@/components/continuerButton";
+import { categorieLabel } from "@/constants/categories";
+import { communeLabel } from "@/constants/communes";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { getPrestataire } from "@/services/prestataireService";
-import { formatFcfa } from "@/utils/format";
-import { Image } from "expo-image";
+import { couleurAvatar, initiales } from "@/utils/avatar";
+import { rechercherPrestataires } from "@api/prestataires";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, MapPin, Star } from "lucide-react-native";
+import { ChevronLeft, MapPin, ShieldCheck } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+function kycMeta(statut: string): { label: string; color: string; background: string } {
+  if (statut === "verifie") return { label: "Vérifié", color: Colors.brand.vert, background: Colors.brand.tintVert };
+  if (statut === "en_cours") {
+    return { label: "Vérification en cours", color: Colors.brand.orange, background: Colors.brand.tintOr };
+  }
+  return { label: "Non vérifié", color: Colors.light.textSecondary, background: Colors.light.backgroundSelected };
+}
 
 export default function FicheArtisan() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
-  const { loading, data: prestataire } = useAsync(() => getPrestataire(id), [id]);
+  const { loading, data: prestataires } = useAsync(() => rechercherPrestataires());
+  const prestataire = prestataires?.find((p) => p.id === id);
 
   const contacter = () => {
     if (!prestataire) return;
@@ -39,27 +50,30 @@ export default function FicheArtisan() {
       ) : (
         <>
           <ScrollView contentContainerStyle={styles.scroll}>
-            <Image source={{ uri: prestataire.avatarUrl }} style={styles.avatar} contentFit="cover" />
-            <Text style={styles.nom}>{prestataire.nom}</Text>
-            <Text style={styles.metier}>{prestataire.metier}</Text>
-
-            <View style={styles.locationRow}>
-              <MapPin size={14} color={Colors.brand.orange} />
-              <Text style={styles.locationText}>À {prestataire.distanceKm} km de vous</Text>
+            <View style={[styles.avatar, { backgroundColor: couleurAvatar(prestataire.id) }]}>
+              <Text style={styles.avatarText}>{initiales(prestataire.nom)}</Text>
             </View>
+            <Text style={styles.nom}>{prestataire.nom}</Text>
+            <Text style={styles.categories}>{prestataire.categories.map(categorieLabel).join(", ")}</Text>
 
-            <View style={styles.statsRow}>
-              <View style={styles.statCard}>
-                <View style={styles.statRatingRow}>
-                  <Star size={14} color="#F59E0B" fill="#F59E0B" />
-                  <Text style={styles.statValue}>{prestataire.note}</Text>
-                </View>
-                <Text style={styles.statLabel}>{prestataire.nbAvis} avis</Text>
+            {prestataire.communes.length > 0 && (
+              <View style={styles.locationRow}>
+                <MapPin size={14} color={Colors.brand.orange} />
+                <Text style={styles.locationText}>{prestataire.communes.map(communeLabel).join(", ")}</Text>
               </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{formatFcfa(prestataire.tarifHoraire)}</Text>
-                <Text style={styles.statLabel}>par heure</Text>
-              </View>
+            )}
+
+            <View style={styles.badgesRow}>
+              <BadgeArtisanChip badge={prestataire.badge} />
+              {(() => {
+                const kyc = kycMeta(prestataire.statutKyc);
+                return (
+                  <View style={[styles.kycBadge, { backgroundColor: kyc.background }]}>
+                    <ShieldCheck size={12} color={kyc.color} />
+                    <Text style={[styles.kycText, { color: kyc.color }]}>{kyc.label}</Text>
+                  </View>
+                );
+              })()}
             </View>
           </ScrollView>
 
@@ -107,22 +121,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: Radii.lg,
-    backgroundColor: Colors.brand.tintOr,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: Spacing.three,
+  },
+  avatarText: {
+    fontFamily: Fonts.title,
+    fontSize: 32,
+    color: "#FFFFFF",
   },
   nom: {
     fontFamily: Fonts.title,
     fontSize: 20,
     color: Colors.brand.encre,
   },
-  metier: {
+  categories: {
     fontFamily: Fonts.body,
     fontSize: 14,
     color: Colors.light.textSecondary,
     marginTop: 2,
+    textAlign: "center",
   },
   locationRow: {
     flexDirection: "row",
@@ -135,34 +156,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.textSecondary,
   },
-  statsRow: {
+  badgesRow: {
     flexDirection: "row",
-    gap: Spacing.three,
-    marginTop: Spacing.four,
-    width: "100%",
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: Radii.md,
-    padding: Spacing.three,
     alignItems: "center",
+    gap: Spacing.two,
+    marginTop: Spacing.four,
   },
-  statRatingRow: {
+  kycBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
   },
-  statValue: {
-    fontFamily: Fonts.titleSemiBold,
-    fontSize: 16,
-    color: Colors.brand.encre,
-  },
-  statLabel: {
-    fontFamily: Fonts.body,
+  kycText: {
+    fontFamily: Fonts.bodyBold,
     fontSize: 11,
-    color: Colors.light.textSecondary,
-    marginTop: 2,
   },
   footer: {
     paddingHorizontal: Spacing.four,

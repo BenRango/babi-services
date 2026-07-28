@@ -1,4 +1,3 @@
-import logo from "@/assets/images/logo/BabiService_logo.png";
 import { UserRole } from "@/types/user";
 import { login } from "@api/auth";
 import { isAxiosError } from "axios";
@@ -15,6 +14,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const logo = require("@/assets/images/logo/BabiService_logo.png");
 
 export default function Login() {
   const [phone, setPhone] = useState("");

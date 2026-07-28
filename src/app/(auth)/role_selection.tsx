@@ -10,7 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import logo from "../../../assets/images/logo/BabiService_logo.png";
+
+const logo = require("../../../assets/images/logo/BabiService_logo.png");
 
 const ROLES: {
   id: UserRole;

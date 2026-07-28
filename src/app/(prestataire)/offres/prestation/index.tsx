@@ -3,14 +3,17 @@ import Timeline from "@/components/timeline";
 import { categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
+import { usePolling } from "@/hooks/usePolling";
 import { PrestationDetail, StatutPrestation } from "@/types/prestation";
 import { formatFcfa } from "@/utils/format";
 import { commencerPrestation, demarrerPrestation, getMesPrestations } from "@api/prestations";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft, MapPin, User } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const POLLING_MS = 7000;
 
 const ACTION_PAR_STATUT: Record<StatutPrestation, { label: string; suivant?: StatutPrestation } | null> = {
   confirmee: { label: "Je prends la route", suivant: "en_route" },
@@ -26,13 +29,8 @@ export default function PrestationEnCours() {
   const [override, setOverride] = useState<PrestationDetail | null>(null);
   const [enCours, setEnCours] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      reload();
-    }, [reload])
-  );
-
   const prestation = override ?? prestations?.find((p) => p.offreId === offreId) ?? null;
+  usePolling(reload, POLLING_MS, prestation?.statut !== "terminee");
 
   if (loading && !prestation) {
     return (

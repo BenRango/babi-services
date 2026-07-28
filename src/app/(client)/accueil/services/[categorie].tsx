@@ -1,9 +1,8 @@
-import ArtisanCard from "@/components/artisanCard";
+import PrestataireCard from "@/components/prestataireCard";
 import { categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
-import { listPrestatairesByCategorie } from "@/services/prestataireService";
-import { CategorieService } from "@/types/demande";
+import { rechercherPrestataires } from "@api/prestataires";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback } from "react";
@@ -11,10 +10,10 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View }
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ArtisansParCategorie() {
-  const { categorie } = useLocalSearchParams<{ categorie: CategorieService }>();
+  const { categorie } = useLocalSearchParams<{ categorie: string }>();
   const router = useRouter();
 
-  const { loading, data: artisans } = useAsync(() => listPrestatairesByCategorie(categorie), [categorie]);
+  const { loading, data: artisans } = useAsync(() => rechercherPrestataires({ categorie }), [categorie]);
 
   const ouvrirArtisan = useCallback(
     (id: string) => router.push(`/(client)/accueil/artisan/${id}`),
@@ -47,7 +46,7 @@ export default function ArtisansParCategorie() {
           data={artisans ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <ArtisanCard prestataire={item} onPress={() => ouvrirArtisan(item.id)} />}
+          renderItem={({ item }) => <PrestataireCard prestataire={item} onPress={() => ouvrirArtisan(item.id)} />}
           ListEmptyComponent={
             <Text style={styles.empty}>Aucun artisan disponible dans cette catégorie pour l&apos;instant.</Text>
           }
