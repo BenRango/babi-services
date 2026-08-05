@@ -1,7 +1,12 @@
+import TabBadge from "@/components/tabBadge";
+import { useNotificationsBadge } from "@/contexts/notificationsBadgeContext";
 import { Tabs } from "expo-router";
 import { ClipboardList, Home, Send, User } from "lucide-react-native";
+import { View } from "react-native";
 
 export default function PrestataireLayout() {
+  const { demandesSansOffre, offresAccepteesNonDemarrees } = useNotificationsBadge();
+
   return (
     <Tabs
       screenOptions={{
@@ -32,14 +37,24 @@ export default function PrestataireLayout() {
         name="demandes"
         options={{
           title: "Demandes",
-          tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <View>
+              <ClipboardList color={color} size={size} />
+              <TabBadge count={demandesSansOffre} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="offres"
         options={{
           title: "Mes offres",
-          tabBarIcon: ({ color, size }) => <Send color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <View>
+              <Send color={color} size={size} />
+              <TabBadge count={offresAccepteesNonDemarrees} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen

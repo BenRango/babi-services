@@ -3,6 +3,7 @@ import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
 import { usePolling } from "@/hooks/usePolling";
 import { apercuDescription } from "@/utils/format";
+import { trierDemandesPourPrestataire } from "@/utils/prestataireSort";
 import { getDemandesOuvertes } from "@api/demandes";
 import { getStoredUser } from "@api/client";
 import { Image } from "expo-image";
@@ -25,7 +26,7 @@ export default function AccueilPrestataire() {
   usePolling(reload, POLLING_MS);
 
   const toutesLesDemandes = demandes ?? [];
-  const demandesProches = toutesLesDemandes.slice(0, 3);
+  const demandesProches = trierDemandesPourPrestataire(toutesLesDemandes, user).slice(0, 3);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>

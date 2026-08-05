@@ -21,7 +21,8 @@ export interface Offre {
   prestataire?: OffrePrestataire;
   prixProposeFcfa: number;
   delaiMinutes: number;
-  message: string;
+  message?: string | null;
+  messageAudioUrl?: string | null;
   statut: OffreStatut;
   createdAt: string;
 }
@@ -30,7 +31,9 @@ export interface CreerOffrePayload {
   demandeId: string;
   prixProposeFcfa: number;
   delaiMinutes: number;
+  /** message OU audio requis (les deux peuvent coexister). */
   message?: string;
+  audio?: { uri: string; mimeType?: string | null; fileName?: string | null };
 }
 
 export interface MesOffreDemande {
@@ -39,7 +42,8 @@ export interface MesOffreDemande {
   categorie: string;
   picture_url?: string | null;
   typeDescription: TypeDescription;
-  description?: string;
+  description?: string | null;
+  audioUrl?: string | null;
   budgetMaxFcfa: number;
   commune?: string | null;
   mode: DemandeMode;
@@ -53,7 +57,8 @@ export interface MesOffre {
   demande: MesOffreDemande;
   prixProposeFcfa: number;
   delaiMinutes: number;
-  message: string;
+  message?: string | null;
+  messageAudioUrl?: string | null;
   statut: OffreStatut;
   createdAt: string;
 }

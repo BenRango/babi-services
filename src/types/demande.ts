@@ -33,7 +33,8 @@ export interface Demande {
   categorie: string;
   picture_url?: string | null;
   typeDescription: TypeDescription;
-  description?: string;
+  description?: string | null;
+  audioUrl?: string | null;
   budgetMaxFcfa: number;
   commune?: string | null;
   mode: DemandeMode;

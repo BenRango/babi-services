@@ -1,13 +1,28 @@
 import { categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { Demande, DemandeStatut } from "@/types/demande";
-import { OffreStatut } from "@/types/offre";
+import { StatutPrestation } from "@/types/prestation";
 import { apercuDescription, formatDateRelative, formatFcfa } from "@/utils/format";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface DemandeCardProps {
   demande: Demande;
+  /** Statut en direct de la prestation liée, si une offre a été acceptée. */
+  statutPrestation?: StatutPrestation;
   onPress: () => void;
+}
+
+function labelStatutPrestation(statut: StatutPrestation): string {
+  switch (statut) {
+    case "confirmee":
+      return "Confirmée";
+    case "en_route":
+      return "En route";
+    case "en_cours":
+      return "Intervention en cours";
+    case "terminee":
+      return "Terminée";
+  }
 }
 
 function statutBadge(statut: DemandeStatut): { label: string; color: string; background: string } {
@@ -25,17 +40,25 @@ function statutBadge(statut: DemandeStatut): { label: string; color: string; bac
   }
 }
 
-function infoContextuelle(demande: Demande): { label: string; color: string } | null {
+function infoContextuelle(
+  demande: Demande,
+  statutPrestation?: StatutPrestation
+): { label: string; color: string; background?: string } | null {
   if (demande.statut === DemandeStatut.OUVERTE) {
     if (demande.offres.length === 0) return null;
     return {
       label: `${demande.offres.length} offre${demande.offres.length > 1 ? "s" : ""}`,
-      color: Colors.brand.orange,
+      color: Colors.brand.vert,
+      background: Colors.brand.tintVert,
     };
   }
   if (demande.statut === DemandeStatut.EN_COURS) {
-    const acceptee = demande.offres.find((o) => o.statut === OffreStatut.ACCEPTEE);
-    return acceptee?.prestataire ? { label: acceptee.prestataire.nom, color: Colors.brand.orange } : null;
+    if (!statutPrestation) return null;
+    return {
+      label: labelStatutPrestation(statutPrestation),
+      color: Colors.brand.vert,
+      background: Colors.brand.tintVert,
+    };
   }
   if (demande.statut === DemandeStatut.ANNULEE) {
     return { label: "Annulé", color: Colors.light.textSecondary };
@@ -43,9 +66,9 @@ function infoContextuelle(demande: Demande): { label: string; color: string } | 
   return null;
 }
 
-export default function DemandeCard({ demande, onPress }: DemandeCardProps) {
+export default function DemandeCard({ demande, statutPrestation, onPress }: DemandeCardProps) {
   const statut = statutBadge(demande.statut);
-  const info = infoContextuelle(demande);
+  const info = infoContextuelle(demande, statutPrestation);
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.topRow}>
@@ -63,7 +86,14 @@ export default function DemandeCard({ demande, onPress }: DemandeCardProps) {
         <Text style={styles.budgetDate}>
           ≤ {formatFcfa(demande.budgetMaxFcfa)} · {formatDateRelative(demande.createdAt)}
         </Text>
-        {info && <Text style={[styles.infoText, { color: info.color }]}>{info.label}</Text>}
+        {info &&
+          (info.background ? (
+            <View style={[styles.infoBadge, { backgroundColor: info.background }]}>
+              <Text style={[styles.infoBadgeText, { color: info.color }]}>{info.label}</Text>
+            </View>
+          ) : (
+            <Text style={[styles.infoText, { color: info.color }]}>{info.label}</Text>
+          ))}
       </View>
     </TouchableOpacity>
   );
@@ -124,6 +154,15 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   infoText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12,
+  },
+  infoBadge: {
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  infoBadgeText: {
     fontFamily: Fonts.bodyBold,
     fontSize: 12,
   },

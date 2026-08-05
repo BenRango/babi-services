@@ -1,9 +1,13 @@
+import TabBadge from "@/components/tabBadge";
+import { useNotificationsBadge } from "@/contexts/notificationsBadgeContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs } from "expo-router";
 import { Home, Plus, User, Wallet } from "lucide-react-native";
 import { View } from "react-native";
 
 export default function ClientLayout() {
+  const { offresEnAttente } = useNotificationsBadge();
+
   return (
     <Tabs
       screenOptions={{
@@ -57,6 +61,7 @@ export default function ClientLayout() {
               }}
             >
               <Plus color="#FFFFFF" size={size} />
+              <TabBadge count={offresEnAttente} />
             </View>
           ),
         }}

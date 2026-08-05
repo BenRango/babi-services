@@ -1,4 +1,5 @@
 import DemandeDescription from "@/components/demandeDescription";
+import OffreMessage from "@/components/offreMessage";
 import { categorieIcon, categorieLabel } from "@/constants/categories";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { useAsync } from "@/hooks/useAsync";
@@ -67,6 +68,9 @@ export default function DetailOffre() {
             </View>
           </View>
           <DemandeDescription demande={offre.demande} textStyle={styles.description} />
+          {offre.demande.picture_url && (
+            <Image source={{ uri: offre.demande.picture_url }} style={styles.photo} contentFit="cover" />
+          )}
           {offre.demande.commune && (
             <View style={styles.communeRow}>
               <MapPin size={12} color={Colors.brand.orange} />
@@ -89,10 +93,10 @@ export default function DetailOffre() {
             <Text style={styles.offreLabel}>Envoyée</Text>
             <Text style={styles.offreValue}>{formatDateRelative(offre.createdAt)}</Text>
           </View>
-          {offre.message && (
+          {(offre.message || offre.messageAudioUrl) && (
             <>
               <Text style={styles.messageLabel}>Votre message</Text>
-              <Text style={styles.message}>{offre.message}</Text>
+              <OffreMessage offre={offre} textStyle={styles.message} />
             </>
           )}
         </View>
@@ -181,6 +185,13 @@ const styles = StyleSheet.create({
   },
   description: {
     marginBottom: Spacing.two,
+  },
+  photo: {
+    width: "100%",
+    height: 160,
+    borderRadius: Radii.sm,
+    marginBottom: Spacing.two,
+    backgroundColor: Colors.light.backgroundSelected,
   },
   communeRow: {
     flexDirection: "row",

@@ -121,7 +121,11 @@ export default function MesDemandes() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <DemandeCard demande={{ ...item, statut: statutAffiche(item) }} onPress={() => ouvrirDemande(item)} />
+            <DemandeCard
+              demande={{ ...item, statut: statutAffiche(item) }}
+              statutPrestation={prestationParDemande.get(item.id)?.statut}
+              onPress={() => ouvrirDemande(item)}
+            />
           )}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} tintColor={Colors.brand.orange} />}
         />

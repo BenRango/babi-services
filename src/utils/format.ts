@@ -1,8 +1,15 @@
-import { TypeDescription } from "@/types/demande";
+export function apercuDescription(demande: { description?: string | null; audioUrl?: string | null }): string {
+  const texte = demande.description?.trim();
+  if (texte) return demande.audioUrl ? `🎤 ${texte}` : texte;
+  if (demande.audioUrl) return "🎤 Note vocale";
+  return "Sans description";
+}
 
-export function apercuDescription(demande: { typeDescription: TypeDescription; description?: string }): string {
-  if (demande.typeDescription === TypeDescription.AUDIO) return "🎤 Note vocale";
-  return demande.description?.trim() || "Sans description";
+export function apercuMessage(offre: { message?: string | null; messageAudioUrl?: string | null }): string {
+  const texte = offre.message?.trim();
+  if (texte) return offre.messageAudioUrl ? `🎤 ${texte}` : texte;
+  if (offre.messageAudioUrl) return "🎤 Message vocal";
+  return "Sans message";
 }
 
 export function formatFcfa(amount: number): string {

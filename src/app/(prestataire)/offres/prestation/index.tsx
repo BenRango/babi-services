@@ -7,6 +7,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { PrestationDetail, StatutPrestation } from "@/types/prestation";
 import { formatFcfa } from "@/utils/format";
 import { commencerPrestation, demarrerPrestation, getMesPrestations } from "@api/prestations";
+import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft, MapPin, User } from "lucide-react-native";
 import { useState } from "react";
@@ -94,6 +95,10 @@ export default function PrestationEnCours() {
         </View>
 
         <DemandeDescription demande={prestation.offre.demande} textStyle={styles.description} />
+
+        {prestation.offre.demande.picture_url && (
+          <Image source={{ uri: prestation.offre.demande.picture_url }} style={styles.photo} contentFit="cover" />
+        )}
 
         {prestation.offre.demande.commune && (
           <View style={styles.communeRow}>
@@ -197,6 +202,13 @@ const styles = StyleSheet.create({
     color: Colors.brand.encre,
     lineHeight: 18,
     marginBottom: Spacing.two,
+  },
+  photo: {
+    width: "100%",
+    height: 160,
+    borderRadius: Radii.sm,
+    marginBottom: Spacing.two,
+    backgroundColor: Colors.light.backgroundSelected,
   },
   communeRow: {
     flexDirection: "row",

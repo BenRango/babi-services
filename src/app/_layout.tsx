@@ -8,6 +8,9 @@ import {
   NunitoSans_600SemiBold,
   NunitoSans_700Bold,
 } from "@expo-google-fonts/nunito-sans";
+import NotificationsPoller from "@/components/notificationsPoller";
+import { NotificationsBadgeProvider } from "@/contexts/notificationsBadgeContext";
+import { ToastProvider } from "@/contexts/toastContext";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -31,5 +34,12 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <NotificationsBadgeProvider>
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <NotificationsPoller />
+      </ToastProvider>
+    </NotificationsBadgeProvider>
+  );
 }

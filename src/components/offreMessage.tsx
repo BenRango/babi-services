@@ -2,22 +2,22 @@ import AudioBubble from "@/components/audioBubble";
 import { Colors, Fonts, Spacing } from "@/constants/theme";
 import { StyleSheet, Text, TextStyle, View } from "react-native";
 
-interface DemandeDescriptionProps {
-  demande: { description?: string | null; audioUrl?: string | null };
+interface OffreMessageProps {
+  offre: { message?: string | null; messageAudioUrl?: string | null };
   textStyle?: TextStyle;
 }
 
-export default function DemandeDescription({ demande, textStyle }: DemandeDescriptionProps) {
-  const texte = demande.description?.trim();
+export default function OffreMessage({ offre, textStyle }: OffreMessageProps) {
+  const texte = offre.message?.trim();
 
-  if (!texte && !demande.audioUrl) {
-    return <Text style={[styles.text, textStyle]}>Sans description</Text>;
+  if (!texte && !offre.messageAudioUrl) {
+    return <Text style={[styles.text, textStyle]}>Sans message</Text>;
   }
 
   return (
     <View style={styles.container}>
       {texte && <Text style={[styles.text, textStyle]}>{texte}</Text>}
-      {demande.audioUrl && <AudioBubble uri={demande.audioUrl} dureeSec={0} moi={false} />}
+      {offre.messageAudioUrl && <AudioBubble uri={offre.messageAudioUrl} dureeSec={0} moi={false} />}
     </View>
   );
 }

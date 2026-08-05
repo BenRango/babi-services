@@ -4,6 +4,7 @@ import { useAsync } from "@/hooks/useAsync";
 import { usePolling } from "@/hooks/usePolling";
 import { Demande } from "@/types/demande";
 import { apercuDescription, formatDateRelative, formatFcfa } from "@/utils/format";
+import { trierDemandesPourPrestataire } from "@/utils/prestataireSort";
 import { getDemandesOuvertes } from "@api/demandes";
 import { getStoredUser } from "@api/client";
 import { Image } from "expo-image";
@@ -37,13 +38,14 @@ export default function DemandesOuvertes() {
     new Set(toutesLesDemandes.map((d) => d.commune).filter((c): c is string => !!c))
   );
 
-  const demandesFiltrees = toutesLesDemandes
-    .filter(
+  const demandesFiltrees = trierDemandesPourPrestataire(
+    toutesLesDemandes.filter(
       (d) =>
         (filtreCategorie === "toutes" || d.categorie === filtreCategorie) &&
         (filtreCommune === "toutes" || d.commune === filtreCommune)
-    )
-    .sort((a, b) => Number(correspondAuProfil(b)) - Number(correspondAuProfil(a)));
+    ),
+    user
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>

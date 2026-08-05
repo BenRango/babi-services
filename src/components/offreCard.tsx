@@ -1,3 +1,4 @@
+import AudioBubble from "@/components/audioBubble";
 import BadgeArtisanChip from "@/components/badgeArtisanChip";
 import { Colors, Fonts, Radii, Spacing } from "@/constants/theme";
 import { Offre, OffreStatut } from "@/types/offre";
@@ -66,9 +67,10 @@ export default function OffreCard({ offre, meilleurPrix, onAccepter, onRefuser }
         <Text style={styles.prix}>{formatFcfa(offre.prixProposeFcfa)}</Text>
       </View>
 
-      {offre.message && (
+      {(offre.message || offre.messageAudioUrl) && (
         <View style={styles.messageBox}>
-          <Text style={styles.message}>« {offre.message.trim()} »</Text>
+          {offre.message && <Text style={styles.message}>« {offre.message.trim()} »</Text>}
+          {offre.messageAudioUrl && <AudioBubble uri={offre.messageAudioUrl} dureeSec={0} moi={false} />}
         </View>
       )}
 
@@ -175,6 +177,7 @@ const styles = StyleSheet.create({
     borderRadius: Radii.sm,
     padding: Spacing.two,
     marginTop: Spacing.three,
+    gap: Spacing.two,
   },
   message: {
     fontFamily: Fonts.body,

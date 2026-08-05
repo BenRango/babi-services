@@ -31,7 +31,8 @@ export interface PrestationDemandeResume {
   categorie: string;
   picture_url: string | null;
   typeDescription: TypeDescription;
-  description?: string;
+  description?: string | null;
+  audioUrl?: string | null;
   budgetMaxFcfa: number;
   commune: string | null;
   mode: DemandeMode;
@@ -43,7 +44,8 @@ export interface PrestationOffreResume {
   demande: PrestationDemandeResume;
   prixProposeFcfa: number;
   delaiMinutes: number;
-  message: string;
+  message?: string | null;
+  messageAudioUrl?: string | null;
 }
 
 /**

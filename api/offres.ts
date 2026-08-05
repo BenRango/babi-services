@@ -26,13 +26,28 @@ export interface OffreCreee {
   prestataireId: string;
   prixProposeFcfa: number;
   delaiMinutes: number;
-  message: string;
+  message?: string | null;
+  messageAudioUrl?: string | null;
   statut: string;
   createdAt: string;
 }
 
 export async function creerOffre(payload: CreerOffrePayload): Promise<OffreCreee> {
-  const { data } = await apiClient.post<OffreCreee>("/offres", payload);
+  const formData = new FormData();
+  formData.append("demandeId", payload.demandeId);
+  formData.append("prixProposeFcfa", String(payload.prixProposeFcfa));
+  formData.append("delaiMinutes", String(payload.delaiMinutes));
+  if (payload.message) formData.append("message", payload.message);
+  if (payload.audio) {
+    formData.append("audio", {
+      uri: payload.audio.uri,
+      name: payload.audio.fileName ?? `message-${Date.now()}.m4a`,
+      type: payload.audio.mimeType ?? "audio/m4a",
+    } as unknown as Blob);
+  }
+  const { data } = await apiClient.post<OffreCreee>("/offres", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }
 
